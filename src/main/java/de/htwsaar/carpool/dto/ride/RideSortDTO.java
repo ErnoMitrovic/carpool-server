@@ -1,5 +1,7 @@
 package de.htwsaar.carpool.dto.ride;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,12 +15,13 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RideSortDTO implements Serializable {
-    // For pagination
-    private int page;
-    private int size;
-
+    // The radius cannot be negative
     @NotNull
-    private LocalTime departureTime;
+    @Min(0)
+    private Double radius;
+    @NotNull
+    @JsonFormat(pattern = "hh:mm:ss")
+    private String departureTime;
     @NotNull
     private Point startLocation;
     @NotNull

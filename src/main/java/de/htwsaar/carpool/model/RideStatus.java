@@ -1,9 +1,6 @@
 package de.htwsaar.carpool.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -12,9 +9,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "ride_status")
+@Table(name = "ride_status", uniqueConstraints = {
+        @UniqueConstraint(name = "ride_status_ak_1", columnNames = {"name"})
+})
 public class RideStatus {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 

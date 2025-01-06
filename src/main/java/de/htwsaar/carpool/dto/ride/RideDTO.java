@@ -12,10 +12,10 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RideDTO implements Serializable {
-    private long id;
+    private Long id;
     private LocalTime departureTime;
     private Point startLocation;
     private Point endLocation;
-    private int seats;
-    private double price;
+    private Integer seats;
+    private Double price;
 }

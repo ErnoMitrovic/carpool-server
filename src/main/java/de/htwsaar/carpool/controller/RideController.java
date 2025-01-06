@@ -1,7 +1,9 @@
 package de.htwsaar.carpool.controller;
 
+import de.htwsaar.carpool.dto.ApiResponseDTO;
 import de.htwsaar.carpool.dto.ride.RideDTO;
 import de.htwsaar.carpool.dto.ride.RideSortDTO;
+import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import de.htwsaar.carpool.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,8 +41,7 @@ public class RideController {
             )
     })
     @PostMapping("/search")
-    public ResponseEntity<RideDTO> searchRides(@RequestBody RideSortDTO rideSortDTO) {
-        // Implementation
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponseDTO<?>> searchRides(@RequestBody RideSortDTO rideSortDTO) throws RideNotFoundException {
+        return rideService.getFilteredRides(rideSortDTO);
     }
 }

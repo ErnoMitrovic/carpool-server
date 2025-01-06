@@ -3,15 +3,18 @@ package de.htwsaar.carpool.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 @Entity
-@Table(name = "user")
+@Table(name = "user", uniqueConstraints = {
+        @UniqueConstraint(name = "user_idx_1", columnNames = {"email", "phone"}),
+        @UniqueConstraint(name = "user_ak_1", columnNames = {"email"}),
+        @UniqueConstraint(name = "user_ak_2", columnNames = {"phone"})
+})
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
