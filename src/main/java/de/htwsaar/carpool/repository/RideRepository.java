@@ -33,7 +33,7 @@ public interface RideRepository extends JpaRepository<Ride, Integer> {
             WHERE
                 ST_Distance(l_start.position, POINT(:startLng, :startLat)) <= :radius
                 AND ST_Distance(l_end.position, POINT(:endLng, :endLat)) <= :radius
-                AND r.departure_time >= :departureTime
+                AND r.departure_datetime >= :departureDatetime
                 AND r.available_seats >= :requiredSeats
                 AND r.ride_status_id = (SELECT id FROM ride_status WHERE name = 'Available')
             """, nativeQuery = true)
@@ -44,6 +44,6 @@ public interface RideRepository extends JpaRepository<Ride, Integer> {
             @Param("endLat") double endLat,
             @Param("radius") double radius,
             @Param("requiredSeats") int requiredSeats,
-            @Param("departureTime") String departureTime
+            @Param("departureDatetime") String departureDatetime
     );
 }

@@ -3,19 +3,20 @@ package de.htwsaar.carpool.dto.ride;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.geo.Point;
+import org.locationtech.jts.geom.Point;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class RideDTO implements Serializable {
-    private Long id;
-    private LocalTime departureTime;
-    private Point startLocation;
-    private Point endLocation;
+    private Integer id;
+    private Instant departureTime;
+    private String startLocation;
+    private String endLocation;
     private Integer seats;
     private Double price;
 }

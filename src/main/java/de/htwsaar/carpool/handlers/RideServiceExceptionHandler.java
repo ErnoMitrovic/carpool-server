@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,14 @@ public class RideServiceExceptionHandler {
         });
         return ResponseEntity.badRequest()
                 .body(new ApiResponseDTO<>(ApiResponseStatus.FAIL, errorMessage.toString()));
+    }
+
+    // SQL Exception handler
+    @ExceptionHandler(value = SQLException.class)
+    public ResponseEntity<ApiResponseDTO<?>>
+    SQLExceptionHandler(SQLException exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponseDTO<>(ApiResponseStatus.FAIL, exception.getMessage()));
     }
 
     // Add exception handler for all other exceptions here

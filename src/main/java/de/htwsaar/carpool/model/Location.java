@@ -3,7 +3,7 @@ package de.htwsaar.carpool.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.springframework.data.geo.Point;
+import org.locationtech.jts.geom.Point;
 
 @Data
 @Entity
@@ -21,6 +21,6 @@ public class Location {
     private String name;
 
     // Use hibernate spatial
-    @Column(name = "position")
+    @Column(name = "position", columnDefinition = "POINT SRID 4326")
     private Point position;
 }

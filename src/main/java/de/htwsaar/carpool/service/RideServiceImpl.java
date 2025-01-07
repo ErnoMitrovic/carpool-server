@@ -18,11 +18,9 @@ import java.util.List;
 public class RideServiceImpl implements RideService {
     private static final double POSITION_END_THRESHOLD = 0.01;
     private final RideRepository rideRepository;
-    private final ModelMapper modelMapper;
 
     public RideServiceImpl(RideRepository rideRepository, ModelMapper modelMapper) {
         this.rideRepository = rideRepository;
-        this.modelMapper = modelMapper;
     }
 
 
@@ -37,7 +35,18 @@ public class RideServiceImpl implements RideService {
                 rideSortDTO.getRadius(),
                 rideSortDTO.getSeats(),
                 rideSortDTO.getDepartureTime()
-        ).stream().map(ride -> modelMapper.map(ride, RideDTO.class)).toList();
+        ).stream().map(ride -> {
+            RideDTO rideDTO = new RideDTO();
+            rideDTO.setId(ride.getId());
+            rideDTO.setDepartureTime(ride.getDepartureDatetime());
+            rideDTO.setStartLocation(
+                    ride.getStartLocation().getPosition().toText());
+            rideDTO.setEndLocation(
+                    ride.getEndLocation().getPosition().toText());
+            rideDTO.setSeats(ride.getAvailableSeats());
+            rideDTO.setPrice(ride.getCostPerSeat());
+            return rideDTO;
+        }).toList();
 
         if(rides.isEmpty()) {
             throw new RideNotFoundException("No rides found");

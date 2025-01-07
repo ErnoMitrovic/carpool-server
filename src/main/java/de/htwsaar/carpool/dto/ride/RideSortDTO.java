@@ -20,7 +20,7 @@ public class RideSortDTO implements Serializable {
     @Min(0)
     private Double radius;
     @NotNull
-    @JsonFormat(pattern = "hh:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
     private String departureTime;
     @NotNull
     private Point startLocation;

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalTime;
 
 @Getter
@@ -21,8 +22,8 @@ public class Ride {
     private Integer id;
 
     @NotNull
-    @Column(name = "departure_time", nullable = false)
-    private LocalTime departureTime;
+    @Column(name = "departure_datetime", nullable = false)
+    private Instant departureDatetime;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -40,7 +41,7 @@ public class Ride {
 
     @NotNull
     @Column(name = "cost_per_seat", nullable = false)
-    private Float costPerSeat;
+    private Double costPerSeat;
 
     @Size(max = 255)
     @NotNull
