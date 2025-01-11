@@ -1,4 +1,4 @@
-package de.htwsaar.carpool.dto.ride;
+package de.htwsaar.carpool.domain.request.ride;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Min;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.geo.Point;
 
 import java.io.Serializable;
-import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor

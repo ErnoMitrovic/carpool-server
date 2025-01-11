@@ -1,20 +1,16 @@
 package de.htwsaar.carpool.handlers;
 
-import de.htwsaar.carpool.dto.ApiResponseDTO;
-import de.htwsaar.carpool.dto.ApiResponseStatus;
+import de.htwsaar.carpool.domain.ApiResponseDTO;
+import de.htwsaar.carpool.domain.ApiResponseStatus;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 public class RideServiceExceptionHandler {

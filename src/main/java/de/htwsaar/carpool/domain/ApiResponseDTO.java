@@ -1,4 +1,4 @@
-package de.htwsaar.carpool.dto;
+package de.htwsaar.carpool.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

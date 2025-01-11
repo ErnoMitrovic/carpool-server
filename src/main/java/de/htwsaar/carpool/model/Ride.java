@@ -27,12 +27,12 @@ public class Ride {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "start_location", nullable = false)
+    @JoinColumn(name = "start_location", referencedColumnName = "id", nullable = false)
     private Location startLocation;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "end_location", nullable = false)
+    @JoinColumn(name = "end_location", referencedColumnName = "id", nullable = false)
     private Location endLocation;
 
     @NotNull
@@ -50,8 +50,8 @@ public class Ride {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "rider_id", nullable = false)
+    private User rider;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

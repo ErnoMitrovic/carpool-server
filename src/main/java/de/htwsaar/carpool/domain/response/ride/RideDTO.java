@@ -1,13 +1,11 @@
-package de.htwsaar.carpool.dto.ride;
+package de.htwsaar.carpool.domain.response.ride;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.Point;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor

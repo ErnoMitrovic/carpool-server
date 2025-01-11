@@ -20,7 +20,7 @@ public interface RideRepository extends JpaRepository<Ride, Integer> {
      * @param endLat End latitude
      * @param radius Radius in which the start and end locations should be
      * @param requiredSeats Number of required seats
-     * @param departureTime Departure time
+     * @param departureDatetime Departure datetime
      * @return List of available rides
      */
     @Query(value = """
