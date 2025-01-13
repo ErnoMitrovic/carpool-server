@@ -2,17 +2,21 @@ package de.htwsaar.carpool.service;
 
 import de.htwsaar.carpool.domain.ApiResponseDTO;
 import de.htwsaar.carpool.domain.ApiResponseStatus;
-import de.htwsaar.carpool.domain.request.ride.CreateRideRequest;
-import de.htwsaar.carpool.domain.request.ride.GetRidesRequest;
-import de.htwsaar.carpool.domain.response.ride.RideResponse;
+import de.htwsaar.carpool.domain.ride.CreateRideRequest;
+import de.htwsaar.carpool.domain.ride.GetRidesRequest;
+import de.htwsaar.carpool.domain.ride.RideResponse;
+import de.htwsaar.carpool.domain.ride.RideStatusValue;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import de.htwsaar.carpool.model.CarpoolUser;
 import de.htwsaar.carpool.model.Location;
 import de.htwsaar.carpool.model.Ride;
+import de.htwsaar.carpool.model.RideStatus;
 import de.htwsaar.carpool.repository.LocationRepository;
 import de.htwsaar.carpool.repository.RideRepository;
+import de.htwsaar.carpool.repository.RideStatusRepository;
 import de.htwsaar.carpool.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -33,15 +37,20 @@ public class RideServiceImpl implements RideService {
     private final RideRepository rideRepository;
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
+    private final RideStatusRepository rideStatusRepository;
 
     private final GeometryFactory geometryFactory = new GeometryFactory(
             new PrecisionModel(), SRID
     );
 
-    public RideServiceImpl(RideRepository rideRepository, LocationRepository locationRepository, UserRepository userRepository) {
+    public RideServiceImpl(RideRepository rideRepository,
+                           LocationRepository locationRepository,
+                           UserRepository userRepository,
+                           RideStatusRepository rideStatusRepository) {
         this.rideRepository = rideRepository;
         this.locationRepository = locationRepository;
         this.userRepository = userRepository;
+        this.rideStatusRepository = rideStatusRepository;
     }
 
 
@@ -78,11 +87,13 @@ public class RideServiceImpl implements RideService {
      * Create a new ride as follows:
      * 1. Checks if the driver exists
      * 2. If the location is not found, create a new location
+     * 3. As default, the status of the ride is set to AVAILABLE
      * @param createRideRequest DTO containing ride details
      * @return ResponseEntity containing ApiResponseDTO
      * @throws DriverNotFoundException if the driver is not found
      */
     @Override
+    @Transactional
     public ResponseEntity<ApiResponseDTO<?>> createRide(CreateRideRequest createRideRequest)
             throws DriverNotFoundException {
         // Check if the driver exists
@@ -91,7 +102,8 @@ public class RideServiceImpl implements RideService {
         );
 
         Point startLocation = geometryFactory.createPoint(
-                new Coordinate(createRideRequest.startLocation().getX(), createRideRequest.startLocation().getY())
+                new Coordinate(createRideRequest.startLocation().getX(),
+                        createRideRequest.startLocation().getY())
         );
 
         Point endLocation = geometryFactory.createPoint(
@@ -121,6 +133,10 @@ public class RideServiceImpl implements RideService {
                     return locationRepository.save(location);
                 });
 
+        // Get available status id
+        RideStatus rideStatus = rideStatusRepository.findByName(RideStatusValue.AVAILABLE.name())
+                .orElseThrow(() -> new RuntimeException("Ride status not found"));
+
         // Create a new ride
         Ride ride = new Ride();
         Instant departureDatetime = Instant.parse(createRideRequest.departureDatetime());
@@ -130,6 +146,8 @@ public class RideServiceImpl implements RideService {
         ride.setAvailableSeats(createRideRequest.availableSeats());
         ride.setCostPerSeat(createRideRequest.costPerSeat());
         ride.setDriver(driver);
+        ride.setRideDescription(createRideRequest.rideDescription());
+        ride.setRideStatus(rideStatus);
 
         rideRepository.save(ride);
 
@@ -143,7 +161,7 @@ public class RideServiceImpl implements RideService {
     private RideResponse buildRideResponse(Ride ride) {
         RideResponse rideDTO = new RideResponse();
         rideDTO.setId(ride.getId());
-        rideDTO.setDepartureTime(ride.getDepartureDatetime());
+        rideDTO.setDepartureTime(ride.getDepartureDatetime().toString());
         rideDTO.setStartLocation(ride.getStart().getPosition().toText());
         rideDTO.setEndLocation(ride.getEnd().getPosition().toText());
         rideDTO.setSeats(ride.getAvailableSeats());

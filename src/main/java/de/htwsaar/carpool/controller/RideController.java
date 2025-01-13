@@ -1,8 +1,8 @@
 package de.htwsaar.carpool.controller;
 
 import de.htwsaar.carpool.domain.ApiResponseDTO;
-import de.htwsaar.carpool.domain.request.ride.CreateRideRequest;
-import de.htwsaar.carpool.domain.request.ride.GetRidesRequest;
+import de.htwsaar.carpool.domain.ride.CreateRideRequest;
+import de.htwsaar.carpool.domain.ride.GetRidesRequest;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import de.htwsaar.carpool.service.RideService;

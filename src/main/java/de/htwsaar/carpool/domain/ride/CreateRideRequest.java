@@ -1,11 +1,11 @@
-package de.htwsaar.carpool.domain.request.ride;
+package de.htwsaar.carpool.domain.ride;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.data.geo.Point;
 
 public record CreateRideRequest(
-        @NotNull @Pattern(regexp = "^(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})$")
+        @NotNull @Pattern(regexp = "^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z)$")
         String departureDatetime,
         @NotNull
         Integer availableSeats,
@@ -16,6 +16,8 @@ public record CreateRideRequest(
         @NotNull
         Point endLocation,
         @NotNull
-        Integer driverId // TODO: Extract from authentication
+        String rideDescription,
+        @NotNull
+        Long driverId // TODO: Extract from authentication
 ) {
 }

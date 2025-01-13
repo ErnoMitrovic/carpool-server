@@ -10,7 +10,7 @@ import java.util.List;
 
 
 @Repository
-public interface RideRepository extends JpaRepository<Ride, Integer> {
+public interface RideRepository extends JpaRepository<Ride, Long> {
 
     /**
      * The method finds available rides that match the given criteria.

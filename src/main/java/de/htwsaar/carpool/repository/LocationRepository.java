@@ -8,11 +8,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface LocationRepository extends JpaRepository<Location, Integer> {
+public interface LocationRepository extends JpaRepository<Location, Long> {
     @Query(value = """
             SELECT l
             FROM Location l
-            WHERE ST_EQUALS(l.position, :position) = true
+            WHERE ST_EQUALS(l.position, :position)
             """)
     Optional<Location> findByPosition(@Param("position") Geometry position);
 }

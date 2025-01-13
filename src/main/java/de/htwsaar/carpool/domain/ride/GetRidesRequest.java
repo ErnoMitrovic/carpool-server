@@ -1,4 +1,4 @@
-package de.htwsaar.carpool.domain.request.ride;
+package de.htwsaar.carpool.domain.ride;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Min;
