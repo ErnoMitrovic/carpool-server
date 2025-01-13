@@ -2,38 +2,23 @@ package de.htwsaar.carpool.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.time.Instant;
-import java.time.LocalTime;
 
-@Getter
-@Setter
+@Data
 @Entity
-@Table(name = "ride", indexes = {
-        @Index(name = "ride_idx_1", columnList = "departure_time")
-})
+@Table(name = "ride", schema = "carpool")
+@SequenceGenerator(name = "ride_id_seq", sequenceName = "ride_id_seq", allocationSize = 1)
 public class Ride {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ride_id_seq")
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @NotNull
     @Column(name = "departure_datetime", nullable = false)
     private Instant departureDatetime;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "start_location", referencedColumnName = "id", nullable = false)
-    private Location startLocation;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "end_location", referencedColumnName = "id", nullable = false)
-    private Location endLocation;
 
     @NotNull
     @Column(name = "available_seats", nullable = false)
@@ -41,21 +26,30 @@ public class Ride {
 
     @NotNull
     @Column(name = "cost_per_seat", nullable = false)
-    private Double costPerSeat;
+    private Float costPerSeat;
 
-    @Size(max = 255)
     @NotNull
-    @Column(name = "ride_description", nullable = false)
+    @Column(name = "ride_description", nullable = false, length = Integer.MAX_VALUE)
     private String rideDescription;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "rider_id", nullable = false)
-    private User rider;
+    @JoinColumn(name = "driver_id", nullable = false)
+    private CarpoolUser driver;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ride_status_id", nullable = false)
     private RideStatus rideStatus;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "start_id", nullable = false)
+    private Location start;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "end_id", nullable = false)
+    private Location end;
 
 }

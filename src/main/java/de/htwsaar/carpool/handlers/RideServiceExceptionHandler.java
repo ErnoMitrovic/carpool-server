@@ -2,7 +2,9 @@ package de.htwsaar.carpool.handlers;
 
 import de.htwsaar.carpool.domain.ApiResponseDTO;
 import de.htwsaar.carpool.domain.ApiResponseStatus;
+import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+@Slf4j
 @RestControllerAdvice
 public class RideServiceExceptionHandler {
 
@@ -40,6 +43,14 @@ public class RideServiceExceptionHandler {
     // Add exception handler for all other exceptions here
     @ExceptionHandler(RideNotFoundException.class)
     public ResponseEntity<ApiResponseDTO<?>> RideNotFoundExceptionHandler(RideNotFoundException exception) {
+        log.atError().log("Ride not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponseDTO<>(ApiResponseStatus.FAIL, exception.getMessage()));
+    }
+
+    @ExceptionHandler(DriverNotFoundException.class)
+    public ResponseEntity<ApiResponseDTO<?>> DriverNotFoundExceptionHandler(DriverNotFoundException exception) {
+        log.atError().log("Driver not found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponseDTO<>(ApiResponseStatus.FAIL, exception.getMessage()));
     }

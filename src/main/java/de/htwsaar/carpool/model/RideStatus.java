@@ -9,12 +9,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "ride_status", uniqueConstraints = {
+@Table(name = "ride_status", schema = "carpool", uniqueConstraints = {
         @UniqueConstraint(name = "ride_status_ak_1", columnNames = {"name"})
 })
+@SequenceGenerator(name = "ride_status_id_seq", sequenceName = "ride_status_id_seq", allocationSize = 1)
 public class RideStatus {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
     private Integer id;
 

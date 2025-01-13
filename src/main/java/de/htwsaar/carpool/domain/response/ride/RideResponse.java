@@ -10,11 +10,11 @@ import java.time.Instant;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RideDTO implements Serializable {
-    private Integer id;
+public class RideResponse implements Serializable {
+    private Long id;
     private Instant departureTime;
     private String startLocation;
     private String endLocation;
     private Integer seats;
-    private Double price;
+    private Float price;
 }

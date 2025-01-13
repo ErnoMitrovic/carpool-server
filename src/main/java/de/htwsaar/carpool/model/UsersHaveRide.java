@@ -7,21 +7,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "users_have_rides", schema = "carpool", indexes = {
-        @Index(name = "users_have_rides_fk1_idx", columnList = "user_id")
-})
+@Table(name = "users_have_rides", schema = "carpool")
 public class UsersHaveRide {
     @EmbeddedId
     private UsersHaveRideId id;
+
+    @MapsId("userId")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private CarpoolUser carpoolUser;
 
     @MapsId("rideId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ride_id", nullable = false)
     private Ride ride;
-
-    @MapsId("userId")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
 
 }

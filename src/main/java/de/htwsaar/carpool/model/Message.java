@@ -2,33 +2,36 @@ package de.htwsaar.carpool.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
 
-@Data
+@Getter
+@Setter
 @Entity
-@Table(name = "message")
+@Table(name = "message", schema = "carpool", indexes = {
+        @Index(name = "message_idx_1", columnList = "timestamp")
+})
+@SequenceGenerator(name = "message_id_seq", sequenceName = "message_id_seq", allocationSize = 1)
 public class Message {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @NotNull
-    @Column(name = "timestamp", nullable = false)
+    @Column(name = "\"timestamp\"", nullable = false)
     private Instant timestamp;
 
-    @Size(max = 255)
     @NotNull
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, length = Integer.MAX_VALUE)
     private String content;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "sender_id", nullable = false)
-    private User sender;
+    private CarpoolUser sender;
 
     @NotNull
     @Column(name = "receiver_id", nullable = false)
@@ -37,11 +40,11 @@ public class Message {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ride_id", nullable = false)
-    private Ride ride;
+    private de.htwsaar.carpool.model.Ride ride;
+
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "message_status_id", nullable = false)
     private MessageStatus messageStatus;
-
 }

@@ -1,27 +1,24 @@
 package de.htwsaar.carpool.model;
 
+import de.htwsaar.carpool.config.Constants;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
-import org.geolatte.geom.GeometryType;
+import lombok.Getter;
+import lombok.Setter;
 import org.locationtech.jts.geom.Point;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "location", schema = "carpool", indexes = {
         @Index(name = "location_idx_1", columnList = "position")
 })
+@SequenceGenerator(name = "location_id_seq", sequenceName = "location_id_seq", allocationSize = 1)
 public class Location {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "location_id_seq")
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
-    @Size(max = 50)
-    @Column(name = "name", length = 50)
-    private String name;
-
-    // Use hibernate spatial
-    @Column(name = "position")
+    @Column(name = "\"position\"", columnDefinition = "geometry(Point, " + Constants.SRID + ")", nullable = false)
     private Point position;
 }

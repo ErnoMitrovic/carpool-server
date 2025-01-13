@@ -3,20 +3,22 @@ package de.htwsaar.carpool.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Entity
-@Table(name = "user", uniqueConstraints = {
-        @UniqueConstraint(name = "user_idx_1", columnNames = {"email", "phone"}),
+@Table(name = "carpool_user", schema = "carpool", uniqueConstraints = {
         @UniqueConstraint(name = "user_ak_1", columnNames = {"email"}),
         @UniqueConstraint(name = "user_ak_2", columnNames = {"phone"})
 })
-public class User {
+@SequenceGenerator(name = "carpool_user_id_seq", sequenceName = "carpool_user_id_seq", allocationSize = 1)
+public class CarpoolUser {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Size(max = 50)
     @NotNull

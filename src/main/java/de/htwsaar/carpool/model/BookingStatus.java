@@ -7,12 +7,13 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "booking_status", uniqueConstraints = {
+@Table(name = "booking_status", schema = "carpool", uniqueConstraints = {
         @UniqueConstraint(name = "booking_status_ak_1", columnNames = {"name"})
 })
+@SequenceGenerator(name = "booking_status_id_seq", sequenceName = "booking_status_id_seq", allocationSize = 1)
 public class BookingStatus {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "booking_status_id_seq")
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -20,5 +21,4 @@ public class BookingStatus {
     @NotNull
     @Column(name = "name", nullable = false, length = 20)
     private String name;
-
 }

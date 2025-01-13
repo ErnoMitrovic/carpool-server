@@ -1,8 +1,9 @@
 package de.htwsaar.carpool.controller;
 
 import de.htwsaar.carpool.domain.ApiResponseDTO;
-import de.htwsaar.carpool.domain.request.ride.CreateRideDTO;
-import de.htwsaar.carpool.domain.request.ride.RideSortDTO;
+import de.htwsaar.carpool.domain.request.ride.CreateRideRequest;
+import de.htwsaar.carpool.domain.request.ride.GetRidesRequest;
+import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import de.htwsaar.carpool.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,14 +34,14 @@ public class RideController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = RideSortDTO.class)
+                                    schema = @Schema(implementation = GetRidesRequest.class)
                             )
                     }
             )
     })
     @GetMapping("/")
-    public ResponseEntity<ApiResponseDTO<?>> searchRides(RideSortDTO rideSortDTO) throws RideNotFoundException {
-        return rideService.getFilteredRides(rideSortDTO);
+    public ResponseEntity<ApiResponseDTO<?>> searchRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
+        return rideService.getFilteredRides(getRidesRequest);
     }
 
     // As a driver, I want to create a carpool ride with details like departure time, destination, available seats,
@@ -52,13 +54,14 @@ public class RideController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = CreateRideDTO.class)
+                                    schema = @Schema(implementation = CreateRideRequest.class)
                             )
                     }
             )
     })
     @PostMapping("/")
-    public ResponseEntity<ApiResponseDTO<?>> createRide(@RequestBody CreateRideDTO createRideDTO) {
-        return rideService.createRide(createRideDTO);
+    public ResponseEntity<ApiResponseDTO<?>> createRide(@Valid @RequestBody CreateRideRequest createRideRequest)
+            throws DriverNotFoundException {
+        return rideService.createRide(createRideRequest);
     }
 }

@@ -7,20 +7,22 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 
+import java.io.Serial;
 import java.util.Objects;
 
 @Getter
 @Setter
 @Embeddable
 public class UsersHaveRideId implements java.io.Serializable {
+    @Serial
     private static final long serialVersionUID = -5571980444741560409L;
-    @NotNull
-    @Column(name = "ride_id", nullable = false)
-    private Integer rideId;
-
     @NotNull
     @Column(name = "user_id", nullable = false)
     private Integer userId;
+
+    @NotNull
+    @Column(name = "ride_id", nullable = false)
+    private Integer rideId;
 
     @Override
     public boolean equals(Object o) {

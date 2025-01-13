@@ -28,8 +28,8 @@ public interface RideRepository extends JpaRepository<Ride, Integer> {
                 r.*
             FROM
                 ride r
-            JOIN location l_start ON r.start_location = l_start.id
-            JOIN location l_end ON r.end_location = l_end.id
+            JOIN location l_start ON r.start_id = l_start.id
+            JOIN location l_end ON r.end_id = l_end.id
             WHERE
                 ST_Distance(l_start.position, POINT(:startLng, :startLat)) <= :radius
                 AND ST_Distance(l_end.position, POINT(:endLng, :endLat)) <= :radius

@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RideSortDTO implements Serializable {
+public class GetRidesRequest implements Serializable {
     // The radius cannot be negative
     @NotNull
     @Min(0)
