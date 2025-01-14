@@ -1,5 +1,3 @@
-SET search_path TO carpool;
-
 INSERT INTO carpool_role (name) VALUES
                                 ('Student'),
                                 ('Driver'),
@@ -13,11 +11,11 @@ INSERT INTO carpool_user (name, email, phone, university_id, role_id) VALUES
                                                                         ('Eve Adams', 'eve.adams@university.edu', 1234567894, 3, 2);
 
 INSERT INTO location (position) VALUES
-                                        (ST_SetSRID(ST_MakePoint(-74.0060, 40.7128), 4326)),  -- New York
-                                        (ST_SetSRID(ST_MakePoint(-118.2437, 34.0522), 4326)), -- Los Angeles
-                                        (ST_SetSRID(ST_MakePoint(-122.4194, 37.7749), 4326)), -- San Francisco
-                                        (ST_SetSRID(ST_MakePoint(-71.0589, 42.3601), 4326)),  -- Boston
-                                        (ST_SetSRID(ST_MakePoint(-122.3321, 47.6062), 4326)); -- Seattle
+                                        (ST_SETSRID(ST_MakePoint(-74.0060, 40.7128), 4326)),  -- New York
+                                        (ST_SETSRID(ST_MakePoint(-118.2437, 34.0522), 4326)), -- Los Angeles
+                                        (ST_SETSRID(ST_MakePoint(-122.4194, 37.7749), 4326)), -- San Francisco
+                                        (ST_SETSRID(ST_MakePoint(-71.0589, 42.3601), 4326)),  -- Boston
+                                        (ST_SETSRID(ST_MakePoint(-122.3321, 47.6062), 4326)); -- Seattle
 
 INSERT INTO ride_status (name) VALUES
                                        ('Available'),
@@ -50,12 +48,12 @@ INSERT INTO booking (created_at, ride_id, user_id, booking_status_id) VALUES
                                                                               (NOW(), 3, 3, 2),  -- Charlie confirmed Eve's ride
                                                                               (NOW(), 4, 2, 3);  -- Bob cancelled Alice's second ride
 INSERT INTO message_status (name) VALUES
-                                          (1, 'Sent'),
-                                          (2, 'Delivered'),
-                                          (3, 'Read');
+                                          ('Sent'),
+                                          ('Delivered'),
+                                          ('Read');
 INSERT INTO message (timestamp, content, sender_id, receiver_id, ride_id, message_status_id) VALUES
-                                                                                                     (1, NOW(), 'Is this ride still available?', 2, 1, 1, 1),
-                                                                                                     (2, NOW(), 'Yes, there are 2 seats left!', 1, 2, 1, 2),
-                                                                                                     (3, NOW(), 'Great! I’ll join.', 2, 1, 1, 3),
-                                                                                                     (4, NOW(), 'Can I book this ride?', 5, 3, 2, 1),
-                                                                                                     (5, NOW(), 'Sure, I’ll confirm it.', 3, 5, 2, 2);
+                                                                                                     (NOW(), 'Is this ride still available?', 2, 1, 1, 1),
+                                                                                                     ( NOW(), 'Yes, there are 2 seats left!', 1, 2, 1, 2),
+                                                                                                     ( NOW(), 'Great! I’ll join.', 2, 1, 1, 3),
+                                                                                                     (NOW(), 'Can I book this ride?', 5, 3, 2, 1),
+                                                                                                     (NOW(), 'Sure, I’ll confirm it.', 3, 5, 2, 2);
