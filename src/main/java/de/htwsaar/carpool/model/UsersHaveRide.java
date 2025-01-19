@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "users_have_rides", schema = "carpool")
+@Table(name = "users_have_rides")
 public class UsersHaveRide {
     @EmbeddedId
     private UsersHaveRideId id;

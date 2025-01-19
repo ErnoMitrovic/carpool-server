@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "booking_status", schema = "carpool", uniqueConstraints = {
+@Table(name = "booking_status", uniqueConstraints = {
         @UniqueConstraint(name = "booking_status_ak_1", columnNames = {"name"})
 })
 @SequenceGenerator(name = "booking_status_id_seq", sequenceName = "booking_status_id_seq", allocationSize = 1)

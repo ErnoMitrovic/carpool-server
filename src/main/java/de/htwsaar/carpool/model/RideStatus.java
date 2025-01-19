@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "ride_status", schema = "carpool", uniqueConstraints = {
+@Table(name = "ride_status", uniqueConstraints = {
         @UniqueConstraint(name = "ride_status_ak_1", columnNames = {"name"})
 })
 @SequenceGenerator(name = "ride_status_id_seq", sequenceName = "ride_status_id_seq", allocationSize = 1)

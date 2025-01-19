@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "carpool_user", schema = "carpool", uniqueConstraints = {
+@Table(name = "carpool_user", uniqueConstraints = {
         @UniqueConstraint(name = "user_ak_1", columnNames = {"email"}),
         @UniqueConstraint(name = "user_ak_2", columnNames = {"phone"})
 })

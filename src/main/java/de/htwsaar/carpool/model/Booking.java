@@ -8,7 +8,7 @@ import java.time.Instant;
 
 @Data
 @Entity
-@Table(name = "booking", schema = "carpool")
+@Table(name = "booking")
 @SequenceGenerator(name = "booking_id_seq", sequenceName = "booking_id_seq", allocationSize = 1)
 public class Booking {
     @Id

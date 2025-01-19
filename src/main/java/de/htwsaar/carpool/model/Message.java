@@ -10,7 +10,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "message", schema = "carpool", indexes = {
+@Table(name = "message", indexes = {
         @Index(name = "message_idx_1", columnList = "timestamp")
 })
 @SequenceGenerator(name = "message_id_seq", sequenceName = "message_id_seq", allocationSize = 1)

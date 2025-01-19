@@ -9,7 +9,7 @@ import org.locationtech.jts.geom.Point;
 @Getter
 @Setter
 @Entity
-@Table(name = "location", schema = "carpool", indexes = {
+@Table(name = "location", indexes = {
         @Index(name = "location_idx_1", columnList = "position")
 })
 @SequenceGenerator(name = "location_id_seq", sequenceName = "location_id_seq", allocationSize = 1)

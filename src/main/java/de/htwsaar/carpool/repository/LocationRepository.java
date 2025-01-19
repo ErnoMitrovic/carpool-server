@@ -1,7 +1,7 @@
 package de.htwsaar.carpool.repository;
 
 import de.htwsaar.carpool.model.Location;
-import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,10 +9,16 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface LocationRepository extends JpaRepository<Location, Long> {
+
+    /**
+     * Find a location by its position within a radius of 10 meters.
+     * @param position The position to search for.
+     * @return The location if found.
+     */
     @Query(value = """
             SELECT l
             FROM Location l
-            WHERE ST_EQUALS(l.position, :position)
+            WHERE distance(l.position, :position) < 0.01
             """)
-    Optional<Location> findByPosition(@Param("position") Geometry position);
+    Optional<Location> findByPosition(@Param("position") Point position);
 }
