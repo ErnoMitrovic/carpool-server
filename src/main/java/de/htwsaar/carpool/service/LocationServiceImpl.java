@@ -1,7 +1,5 @@
 package de.htwsaar.carpool.service;
 
-import de.htwsaar.carpool.domain.ApiResponseDTO;
-import de.htwsaar.carpool.domain.ApiResponseStatus;
 import de.htwsaar.carpool.domain.location.CreateLocationRequest;
 import de.htwsaar.carpool.domain.location.LocationResponse;
 import de.htwsaar.carpool.model.Location;
@@ -33,10 +31,10 @@ public class LocationServiceImpl implements LocationService {
      * 2. Create a new Location object
      * 3. Build a response entity containing the saved location
      * @param locationRequest DTO containing location details
-     * @return ResponseEntity containing ApiResponseDTO
+     * @return ResponseEntity containing LocationResponse DTO
      */
     @Override
-    public ResponseEntity<ApiResponseDTO<?>> saveLocation(CreateLocationRequest locationRequest) {
+    public ResponseEntity<LocationResponse> saveLocation(CreateLocationRequest locationRequest) {
         Point point = geometryFactory.createPoint(
                 new Coordinate(
                         locationRequest.longitude(),
@@ -53,13 +51,6 @@ public class LocationServiceImpl implements LocationService {
                 savedLocation.getPosition().toText()
         );
 
-        return new ResponseEntity<>(
-
-                new ApiResponseDTO<>(
-                        ApiResponseStatus.SUCCESS,
-                        locationResponse
-                ),
-                HttpStatus.CREATED
-        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(locationResponse);
     }
 }

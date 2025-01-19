@@ -1,7 +1,5 @@
 package de.htwsaar.carpool.service;
 
-import de.htwsaar.carpool.domain.ApiResponseDTO;
-import de.htwsaar.carpool.domain.ApiResponseStatus;
 import de.htwsaar.carpool.domain.ride.CreateRideRequest;
 import de.htwsaar.carpool.domain.ride.GetRidesRequest;
 import de.htwsaar.carpool.domain.ride.RideResponse;
@@ -22,6 +20,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -57,11 +56,11 @@ public class RideServiceImpl implements RideService {
     /**
      * Get all available rides based on the request
      * @param getRidesRequest DTO containing request details
-     * @return ResponseEntity containing ApiResponseDTO
+     * @return ResponseEntity containing list of RideResponse DTOs
      * @throws RideNotFoundException if no rides are found
      */
     @Override
-    public ResponseEntity<ApiResponseDTO<?>> getFilteredRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
+    public ResponseEntity<List<RideResponse>> getFilteredRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
 
         List<RideResponse> rides = rideRepository.findAvailableRides(
                 getRidesRequest.getStartLocation().getX(),
@@ -79,8 +78,7 @@ public class RideServiceImpl implements RideService {
 
         log.atDebug().log("Found {} rides", rides.size());
 
-        return ResponseEntity.ok(
-                new ApiResponseDTO<>(ApiResponseStatus.SUCCESS, rides));
+        return ResponseEntity.ok(rides);
     }
 
     /**
@@ -89,12 +87,12 @@ public class RideServiceImpl implements RideService {
      * 2. If the location is not found, create a new location
      * 3. As default, the status of the ride is set to AVAILABLE
      * @param createRideRequest DTO containing ride details
-     * @return ResponseEntity containing ApiResponseDTO
+     * @return ResponseEntity containing RideResponse DTO
      * @throws DriverNotFoundException if the driver is not found
      */
     @Override
     @Transactional
-    public ResponseEntity<ApiResponseDTO<?>> createRide(CreateRideRequest createRideRequest)
+    public ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest)
             throws DriverNotFoundException {
         // Check if the driver exists
         CarpoolUser driver = userRepository.findById(createRideRequest.driverId()).orElseThrow(
@@ -154,18 +152,17 @@ public class RideServiceImpl implements RideService {
         RideResponse rideResponse = buildRideResponse(ride);
         log.atDebug().log("Ride created successfully");
 
-        return ResponseEntity.ok(
-                new ApiResponseDTO<>(ApiResponseStatus.SUCCESS, rideResponse));
+        return ResponseEntity.status(HttpStatus.CREATED).body(rideResponse);
     }
 
     private RideResponse buildRideResponse(Ride ride) {
-        RideResponse rideDTO = new RideResponse();
-        rideDTO.setId(ride.getId());
-        rideDTO.setDepartureTime(ride.getDepartureDatetime().toString());
-        rideDTO.setStartLocation(ride.getStart().getPosition().toText());
-        rideDTO.setEndLocation(ride.getEnd().getPosition().toText());
-        rideDTO.setSeats(ride.getAvailableSeats());
-        rideDTO.setPrice(ride.getCostPerSeat());
-        return rideDTO;
+        return new RideResponse(
+                ride.getId(),
+                ride.getDepartureDatetime().toString(),
+                ride.getStart().getPosition().toText(),
+                ride.getEnd().getPosition().toText(),
+                ride.getAvailableSeats(),
+                ride.getCostPerSeat()
+        );
     }
 }

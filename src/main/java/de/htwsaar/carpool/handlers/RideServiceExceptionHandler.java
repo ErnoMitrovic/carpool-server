@@ -1,7 +1,6 @@
 package de.htwsaar.carpool.handlers;
 
-import de.htwsaar.carpool.domain.ApiResponseDTO;
-import de.htwsaar.carpool.domain.ApiResponseStatus;
+import de.htwsaar.carpool.domain.ErrorResponse;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ public class RideServiceExceptionHandler {
 
     // Add validation exception handler here
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponseDTO<?>>
+    public ResponseEntity<ErrorResponse>
     MethodArgumentNotValidExceptionHandler(MethodArgumentNotValidException exception) {
 
         ArrayList<Object> errorMessage = new ArrayList<>();
@@ -29,29 +28,29 @@ public class RideServiceExceptionHandler {
             errorMessage.add(error.getDefaultMessage());
         });
         return ResponseEntity.badRequest()
-                .body(new ApiResponseDTO<>(ApiResponseStatus.FAIL, errorMessage.toString()));
+                .body(new ErrorResponse(errorMessage.toString()));
     }
 
     // SQL Exception handler
     @ExceptionHandler(value = SQLException.class)
-    public ResponseEntity<ApiResponseDTO<?>>
+    public ResponseEntity<ErrorResponse>
     SQLExceptionHandler(SQLException exception) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponseDTO<>(ApiResponseStatus.FAIL, exception.getMessage()));
+                .body(new ErrorResponse(exception.getMessage()));
     }
 
     // Add exception handler for all other exceptions here
     @ExceptionHandler(RideNotFoundException.class)
-    public ResponseEntity<ApiResponseDTO<?>> RideNotFoundExceptionHandler(RideNotFoundException exception) {
+    public ResponseEntity<ErrorResponse> RideNotFoundExceptionHandler(RideNotFoundException exception) {
         log.atError().log("Ride not found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponseDTO<>(ApiResponseStatus.FAIL, exception.getMessage()));
+                .body(new ErrorResponse(exception.getMessage()));
     }
 
     @ExceptionHandler(DriverNotFoundException.class)
-    public ResponseEntity<ApiResponseDTO<?>> DriverNotFoundExceptionHandler(DriverNotFoundException exception) {
+    public ResponseEntity<ErrorResponse> DriverNotFoundExceptionHandler(DriverNotFoundException exception) {
         log.atError().log("Driver not found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponseDTO<>(ApiResponseStatus.FAIL, exception.getMessage()));
+                .body(new ErrorResponse(exception.getMessage()));
     }
 }

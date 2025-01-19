@@ -1,7 +1,7 @@
 package de.htwsaar.carpool.controller;
 
-import de.htwsaar.carpool.domain.ApiResponseDTO;
 import de.htwsaar.carpool.domain.location.CreateLocationRequest;
+import de.htwsaar.carpool.domain.location.LocationResponse;
 import de.htwsaar.carpool.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,7 +38,7 @@ public class LocationController {
             )
     })
     @PostMapping("/")
-    public ResponseEntity<ApiResponseDTO<?>> saveLocation(@Valid @RequestBody CreateLocationRequest locationRequest) {
+    public ResponseEntity<LocationResponse> saveLocation(@Valid @RequestBody CreateLocationRequest locationRequest) {
         return locationService.saveLocation(locationRequest);
     }
 }

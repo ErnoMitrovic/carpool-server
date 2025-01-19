@@ -1,8 +1,8 @@
 package de.htwsaar.carpool.controller;
 
-import de.htwsaar.carpool.domain.ApiResponseDTO;
 import de.htwsaar.carpool.domain.ride.CreateRideRequest;
 import de.htwsaar.carpool.domain.ride.GetRidesRequest;
+import de.htwsaar.carpool.domain.ride.RideResponse;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import de.htwsaar.carpool.service.RideService;
@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/ride")
@@ -40,7 +42,7 @@ public class RideController {
             )
     })
     @GetMapping("/")
-    public ResponseEntity<ApiResponseDTO<?>> searchRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
+    public ResponseEntity<List<RideResponse>> searchRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
         return rideService.getFilteredRides(getRidesRequest);
     }
 
@@ -60,7 +62,7 @@ public class RideController {
             )
     })
     @PostMapping("/")
-    public ResponseEntity<ApiResponseDTO<?>> createRide(@Valid @RequestBody CreateRideRequest createRideRequest)
+    public ResponseEntity<RideResponse> createRide(@Valid @RequestBody CreateRideRequest createRideRequest)
             throws DriverNotFoundException {
         return rideService.createRide(createRideRequest);
     }
