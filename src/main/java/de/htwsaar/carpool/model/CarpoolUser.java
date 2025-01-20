@@ -9,11 +9,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "user")
-public class User {
+@Table(name = "carpool_user", uniqueConstraints = {
+        @UniqueConstraint(name = "user_ak_1", columnNames = {"email"}),
+        @UniqueConstraint(name = "user_ak_2", columnNames = {"phone"})
+})
+@SequenceGenerator(name = "carpool_user_id_seq", sequenceName = "carpool_user_id_seq", allocationSize = 1)
+public class CarpoolUser {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Size(max = 50)
     @NotNull

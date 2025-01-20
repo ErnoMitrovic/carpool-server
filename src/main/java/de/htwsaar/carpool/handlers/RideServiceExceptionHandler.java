@@ -1,30 +1,56 @@
 package de.htwsaar.carpool.handlers;
 
+import de.htwsaar.carpool.domain.ErrorResponse;
+import de.htwsaar.carpool.exceptions.DriverNotFoundException;
+import de.htwsaar.carpool.exceptions.RideNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.FieldError;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
+@Slf4j
 @RestControllerAdvice
 public class RideServiceExceptionHandler {
 
     // Add validation exception handler here
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> ValidationException(MethodArgumentNotValidException exception) {
-        Map<String, String> errors = new HashMap<>();
-        exception.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse>
+    MethodArgumentNotValidExceptionHandler(MethodArgumentNotValidException exception) {
+
+        ArrayList<Object> errorMessage = new ArrayList<>();
+
+        exception.getBindingResult().getFieldErrors().forEach(error -> {
+            errorMessage.add(error.getDefaultMessage());
         });
-        return errors;
+        return ResponseEntity.badRequest()
+                .body(new ErrorResponse(errorMessage.toString()));
+    }
+
+    // SQL Exception handler
+    @ExceptionHandler(value = SQLException.class)
+    public ResponseEntity<ErrorResponse>
+    SQLExceptionHandler(SQLException exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(exception.getMessage()));
     }
 
     // Add exception handler for all other exceptions here
+    @ExceptionHandler(RideNotFoundException.class)
+    public ResponseEntity<ErrorResponse> RideNotFoundExceptionHandler(RideNotFoundException exception) {
+        log.atError().log("Ride not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(exception.getMessage()));
+    }
+
+    @ExceptionHandler(DriverNotFoundException.class)
+    public ResponseEntity<ErrorResponse> DriverNotFoundExceptionHandler(DriverNotFoundException exception) {
+        log.atError().log("Driver not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(exception.getMessage()));
+    }
 }

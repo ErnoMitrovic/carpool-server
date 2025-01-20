@@ -1,18 +1,21 @@
 package de.htwsaar.carpool.controller;
 
-import de.htwsaar.carpool.dto.ride.RideDTO;
-import de.htwsaar.carpool.dto.ride.RideSortDTO;
+import de.htwsaar.carpool.domain.ride.CreateRideRequest;
+import de.htwsaar.carpool.domain.ride.GetRidesRequest;
+import de.htwsaar.carpool.domain.ride.RideResponse;
+import de.htwsaar.carpool.exceptions.DriverNotFoundException;
+import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import de.htwsaar.carpool.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/ride")
@@ -33,14 +36,34 @@ public class RideController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = RideSortDTO.class)
+                                    schema = @Schema(implementation = GetRidesRequest.class)
                             )
                     }
             )
     })
-    @PostMapping("/search")
-    public ResponseEntity<RideDTO> searchRides(@RequestBody RideSortDTO rideSortDTO) {
-        // Implementation
-        return ResponseEntity.ok().build();
+    @GetMapping("/")
+    public ResponseEntity<List<RideResponse>> searchRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
+        return rideService.getFilteredRides(getRidesRequest);
+    }
+
+    // As a driver, I want to create a carpool ride with details like departure time, destination, available seats,
+    // and pick-up points so that other users can find and join my ride.
+    @Operation(summary = "Create a carpool ride")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully created ride",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = CreateRideRequest.class)
+                            )
+                    }
+            )
+    })
+    @PostMapping("/")
+    public ResponseEntity<RideResponse> createRide(@Valid @RequestBody CreateRideRequest createRideRequest)
+            throws DriverNotFoundException {
+        return rideService.createRide(createRideRequest);
     }
 }

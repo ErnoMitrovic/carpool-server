@@ -2,25 +2,23 @@ package de.htwsaar.carpool.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.data.geo.Point;
+import lombok.Data;
 
-import java.time.LocalTime;
+import java.time.Instant;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "ride")
+@SequenceGenerator(name = "ride_id_seq", sequenceName = "ride_id_seq", allocationSize = 1)
 public class Ride {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ride_id_seq")
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @NotNull
-    @Column(name = "departure_time", nullable = false)
-    private LocalTime departureTime;
+    @Column(name = "departure_datetime", nullable = false)
+    private Instant departureDatetime;
 
     @NotNull
     @Column(name = "available_seats", nullable = false)
@@ -29,25 +27,29 @@ public class Ride {
     @NotNull
     @Column(name = "cost_per_seat", nullable = false)
     private Float costPerSeat;
+
+    @NotNull
+    @Column(name = "ride_description", nullable = false, length = Integer.MAX_VALUE)
+    private String rideDescription;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "driver_id", nullable = false)
+    private CarpoolUser driver;
 
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "ride_description", nullable = false)
-    private String rideDescription;
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ride_status_id", nullable = false)
     private RideStatus rideStatus;
 
     @NotNull
-    @Column(name = "start_location", nullable = false, columnDefinition = "point not null")
-    private Point startLocation;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "start_id", nullable = false)
+    private Location start;
 
     @NotNull
-    @Column(name = "end_location", nullable = false, columnDefinition = "point not null")
-    private Point endLocation;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "end_id", nullable = false)
+    private Location end;
+
 }
