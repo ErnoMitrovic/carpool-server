@@ -196,4 +196,13 @@ public class RideServiceImpl implements RideService {
         RideResponse rideResponse = buildRideResponse(ride);
         return ResponseEntity.ok(rideResponse);
     }
+
+    @Override
+    public ResponseEntity<Long> deleteRide(Long rideId, Long driverId) throws RideNotFoundException, UnauthorizedDriverException {
+        Ride ride = rideRepository.findById(rideId).orElseThrow(
+                () -> new RideNotFoundException("Ride not found"));
+
+        rideRepository.delete(ride);
+        return ResponseEntity.ok(rideId);
+    }
 }

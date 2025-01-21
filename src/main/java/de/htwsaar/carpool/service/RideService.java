@@ -46,4 +46,14 @@ public interface RideService {
     @Transactional
     ResponseEntity<RideResponse> updateRide(Long rideId, @Valid UpdateRideRequest updateRideRequest)
             throws RideNotFoundException, UnauthorizedDriverException;
+
+    /**
+     * As a driver, I want to delete a carpool ride that I have created.
+     * @param rideId Ride ID
+     * @return ResponseEntity<Long> Ride ID
+     * @throws RideNotFoundException RideNotFoundException if ride is not found
+     * @throws UnauthorizedDriverException UnauthorizedDriverException if driver is not authorized
+     */
+    ResponseEntity<Long> deleteRide(Long rideId, Long driverId) // TODO: Get rider ID from token
+            throws RideNotFoundException, UnauthorizedDriverException;
 }

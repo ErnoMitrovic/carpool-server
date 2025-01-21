@@ -6,6 +6,7 @@ import de.htwsaar.carpool.domain.ride.RideResponse;
 import de.htwsaar.carpool.domain.ride.UpdateRideRequest;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
+import de.htwsaar.carpool.exceptions.UnauthorizedDriverException;
 import de.htwsaar.carpool.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -86,5 +87,24 @@ public class RideController {
                                                    @Valid @RequestBody UpdateRideRequest updateRideRequest)
             throws RideNotFoundException {
         return rideService.updateRide(rideId, updateRideRequest);
+    }
+
+    @Operation(summary = "Delete a carpool ride")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully deleted ride",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = Long.class)
+                            )
+                    }
+            )
+    })
+    @DeleteMapping("/{rideId}")
+    public ResponseEntity<Long> deleteRide(@PathVariable Long rideId, @RequestParam Long driverId)
+            throws RideNotFoundException, UnauthorizedDriverException {
+        return rideService.deleteRide(rideId, driverId);
     }
 }
