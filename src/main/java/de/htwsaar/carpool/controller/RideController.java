@@ -3,8 +3,10 @@ package de.htwsaar.carpool.controller;
 import de.htwsaar.carpool.domain.ride.CreateRideRequest;
 import de.htwsaar.carpool.domain.ride.GetRidesRequest;
 import de.htwsaar.carpool.domain.ride.RideResponse;
+import de.htwsaar.carpool.domain.ride.UpdateRideRequest;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
+import de.htwsaar.carpool.exceptions.UnauthorizedDriverException;
 import de.htwsaar.carpool.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -65,5 +67,44 @@ public class RideController {
     public ResponseEntity<RideResponse> createRide(@Valid @RequestBody CreateRideRequest createRideRequest)
             throws DriverNotFoundException {
         return rideService.createRide(createRideRequest);
+    }
+
+    @Operation(summary = "Update a carpool ride")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully updated ride",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = UpdateRideRequest.class)
+                            )
+                    }
+            )
+    })
+    @PutMapping("/{rideId}")
+    public ResponseEntity<RideResponse> updateRide(@PathVariable Long rideId,
+                                                   @Valid @RequestBody UpdateRideRequest updateRideRequest)
+            throws RideNotFoundException {
+        return rideService.updateRide(rideId, updateRideRequest);
+    }
+
+    @Operation(summary = "Delete a carpool ride by updating its status to cancelled")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully deleted ride",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = Long.class)
+                            )
+                    }
+            )
+    })
+    @DeleteMapping("/{rideId}/")
+    public ResponseEntity<Void> cancelRide(@PathVariable Long rideId, @RequestParam Long driverId)
+            throws RideNotFoundException, UnauthorizedDriverException {
+        return rideService.cancelRide(rideId, driverId);
     }
 }

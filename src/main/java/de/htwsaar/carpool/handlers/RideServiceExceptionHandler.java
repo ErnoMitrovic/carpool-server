@@ -3,6 +3,7 @@ package de.htwsaar.carpool.handlers;
 import de.htwsaar.carpool.domain.ErrorResponse;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
+import de.htwsaar.carpool.exceptions.UnauthorizedDriverException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,13 @@ public class RideServiceExceptionHandler {
     public ResponseEntity<ErrorResponse> DriverNotFoundExceptionHandler(DriverNotFoundException exception) {
         log.atError().log("Driver not found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(exception.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedDriverException.class)
+    public ResponseEntity<ErrorResponse> UnauthorizedDriverExceptionHandler(UnauthorizedDriverException exception) {
+        log.atError().log("Unauthorized driver");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse(exception.getMessage()));
     }
 }
