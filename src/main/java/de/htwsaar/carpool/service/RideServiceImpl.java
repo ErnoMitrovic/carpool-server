@@ -3,6 +3,7 @@ package de.htwsaar.carpool.service;
 import de.htwsaar.carpool.domain.ride.*;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
+import de.htwsaar.carpool.exceptions.StatusNotFound;
 import de.htwsaar.carpool.exceptions.UnauthorizedDriverException;
 import de.htwsaar.carpool.model.CarpoolUser;
 import de.htwsaar.carpool.model.Location;
@@ -198,11 +199,20 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public ResponseEntity<Long> deleteRide(Long rideId, Long driverId) throws RideNotFoundException, UnauthorizedDriverException {
+    @Transactional
+    public ResponseEntity<Void> cancelRide(Long rideId, Long driverId)
+            throws RideNotFoundException, UnauthorizedDriverException, StatusNotFound {
         Ride ride = rideRepository.findById(rideId).orElseThrow(
                 () -> new RideNotFoundException("Ride not found"));
 
-        rideRepository.delete(ride);
-        return ResponseEntity.ok(rideId);
+        if(!Objects.equals(ride.getDriver().getId(), driverId)) {
+            throw new UnauthorizedDriverException("Driver is not authorized to cancel this ride");
+        }
+
+        ride.setRideStatus(rideStatusRepository.findByName(RideStatusValue.CANCELLED.name())
+                .orElseThrow(() -> new StatusNotFound("Ride status not found")));
+
+        rideRepository.save(ride);
+        return ResponseEntity.noContent().build();
     }
 }

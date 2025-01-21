@@ -89,7 +89,7 @@ public class RideController {
         return rideService.updateRide(rideId, updateRideRequest);
     }
 
-    @Operation(summary = "Delete a carpool ride")
+    @Operation(summary = "Delete a carpool ride by updating its status to cancelled")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -102,9 +102,9 @@ public class RideController {
                     }
             )
     })
-    @DeleteMapping("/{rideId}")
-    public ResponseEntity<Long> deleteRide(@PathVariable Long rideId, @RequestParam Long driverId)
+    @DeleteMapping("/{rideId}/")
+    public ResponseEntity<Void> cancelRide(@PathVariable Long rideId, @RequestParam Long driverId)
             throws RideNotFoundException, UnauthorizedDriverException {
-        return rideService.deleteRide(rideId, driverId);
+        return rideService.cancelRide(rideId, driverId);
     }
 }

@@ -58,7 +58,7 @@ public class RideServiceExceptionHandler {
     @ExceptionHandler(UnauthorizedDriverException.class)
     public ResponseEntity<ErrorResponse> UnauthorizedDriverExceptionHandler(UnauthorizedDriverException exception) {
         log.atError().log("Unauthorized driver");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse(exception.getMessage()));
     }
 }

@@ -32,8 +32,7 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +55,10 @@ public class RideServiceTest {
     @InjectMocks
     private RideServiceImpl rideService;
 
+    /**
+     * Test the createRide method in RideService
+     * @throws DriverNotFoundException if driver is not found
+     */
     @Test
     public void testCreateRide_Success() throws DriverNotFoundException {
         // Mock inputs
@@ -108,9 +111,11 @@ public class RideServiceTest {
         assertEquals(3, response.getBody().seats());
     }
 
+    /**
+     * Test the createRide method in RideService with a driver that is not found
+     */
     @Test
     public void testCreateRide_DriverNotFound() {
-        // Mock inputs
         CreateRideRequest request = new CreateRideRequest(
                 Instant.now().toString(),
                 3,
@@ -121,10 +126,8 @@ public class RideServiceTest {
                 2L
         );
 
-        // Mock repository behavior
         when(userRepository.findById(2L)).thenReturn(Optional.empty());
 
-        // Call the method
         try {
             rideService.createRide(request);
         } catch (DriverNotFoundException e) {
@@ -132,6 +135,11 @@ public class RideServiceTest {
         }
     }
 
+    /**
+     * Test the updateRide method in RideService with a successful update
+     * @throws RideNotFoundException if ride is not found
+     * @throws UnauthorizedDriverException if driver is not authorized
+     */
     @Test
     public void testUpdateRide_Success() throws RideNotFoundException, UnauthorizedDriverException {
         Ride ride = new Ride();
@@ -165,4 +173,62 @@ public class RideServiceTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(4, Objects.requireNonNull(response.getBody()).seats());
     }
+
+    /**
+     * Test the updateRide method in RideService with a ride that is not found
+     * @throws RideNotFoundException if ride is not found
+     * @throws UnauthorizedDriverException if driver is not authorized
+     */
+    @Test
+    public void testUpdateRideStatus_Success() throws RideNotFoundException, UnauthorizedDriverException {
+        CarpoolUser driver = new CarpoolUser();
+        driver.setId(1L);
+        driver.setName("John Doe");
+
+        Ride ride = new Ride();
+        ride.setId(1L);
+        ride.setDriver(driver);
+
+        RideStatus canceledStatus = new RideStatus();
+        canceledStatus.setName("CANCELLED");
+
+        when(rideRepository.findById(1L)).thenReturn(Optional.of(ride));
+        when(rideStatusRepository.findByName("CANCELLED")).thenReturn(Optional.of(canceledStatus));
+        when(rideRepository.save(any(Ride.class))).thenReturn(ride);
+
+        ResponseEntity<Void> response = rideService.cancelRide(1L, 1L);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    /**
+     * Test the updateRide method in RideService with a ride that is not found
+     */
+    @Test
+    public void testUpdateRideStatus_RideNotFound() {
+        when(rideRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RideNotFoundException.class, () -> rideService.cancelRide(999L, 1L));
+    }
+
+    /**
+     * Test the updateRide method in RideService with an unauthorized driver
+     */
+    @Test
+    public void testUpdateRideStatus_UnauthorizedDriver() {
+        CarpoolUser driver = new CarpoolUser();
+        driver.setId(2L);
+        driver.setName("Jane Doe");
+        Ride ride = new Ride();
+        ride.setId(1L);
+        ride.setDriver(driver);
+
+        // Mock repository behavior
+        when(rideRepository.findById(1L)).thenReturn(Optional.of(ride));
+
+        // Call the service method and expect exception
+        assertThrows(UnauthorizedDriverException.class, () -> rideService.cancelRide(1L, 1L));
+    }
+
 }
