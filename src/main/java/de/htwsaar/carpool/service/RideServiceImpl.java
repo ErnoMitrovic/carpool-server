@@ -1,11 +1,9 @@
 package de.htwsaar.carpool.service;
 
-import de.htwsaar.carpool.domain.ride.CreateRideRequest;
-import de.htwsaar.carpool.domain.ride.GetRidesRequest;
-import de.htwsaar.carpool.domain.ride.RideResponse;
-import de.htwsaar.carpool.domain.ride.RideStatusValue;
+import de.htwsaar.carpool.domain.ride.*;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
+import de.htwsaar.carpool.exceptions.UnauthorizedDriverException;
 import de.htwsaar.carpool.model.CarpoolUser;
 import de.htwsaar.carpool.model.Location;
 import de.htwsaar.carpool.model.Ride;
@@ -26,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 import static de.htwsaar.carpool.config.Constants.SRID;
 
@@ -52,13 +51,29 @@ public class RideServiceImpl implements RideService {
         this.rideStatusRepository = rideStatusRepository;
     }
 
+    private RideResponse buildRideResponse(Ride ride) {
+        return new RideResponse(
+                ride.getId(),
+                ride.getDepartureDatetime().toString(),
+                ride.getStart().getPosition().toText(),
+                ride.getEnd().getPosition().toText(),
+                ride.getAvailableSeats(),
+                ride.getCostPerSeat()
+        );
+    }
 
-    /**
-     * Get all available rides based on the request
-     * @param getRidesRequest DTO containing request details
-     * @return ResponseEntity containing list of RideResponse DTOs
-     * @throws RideNotFoundException if no rides are found
-     */
+    private Location getOrInsertLocation(Point position) {
+        return locationRepository.findByPosition(
+                position
+        ).orElseGet(() -> {
+            log.atInfo().log("Location not found, creating new location");
+            Location location = new Location();
+            location.setPosition(position);
+            return locationRepository.save(location);
+        });
+    }
+
+
     @Override
     public ResponseEntity<List<RideResponse>> getFilteredRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
 
@@ -81,15 +96,6 @@ public class RideServiceImpl implements RideService {
         return ResponseEntity.ok(rides);
     }
 
-    /**
-     * Create a new ride as follows:
-     * 1. Checks if the driver exists
-     * 2. If the location is not found, create a new location
-     * 3. As default, the status of the ride is set to AVAILABLE
-     * @param createRideRequest DTO containing ride details
-     * @return ResponseEntity containing RideResponse DTO
-     * @throws DriverNotFoundException if the driver is not found
-     */
     @Override
     @Transactional
     public ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest)
@@ -100,36 +106,20 @@ public class RideServiceImpl implements RideService {
         );
 
         Point startLocation = geometryFactory.createPoint(
-                new Coordinate(createRideRequest.startLocation().getX(),
-                        createRideRequest.startLocation().getY())
+                new Coordinate(createRideRequest.startLocation().x(),
+                        createRideRequest.startLocation().y())
         );
 
         Point endLocation = geometryFactory.createPoint(
-                new Coordinate(createRideRequest.endLocation().getX(),
-                        createRideRequest.endLocation().getY())
+                new Coordinate(createRideRequest.endLocation().x(),
+                        createRideRequest.endLocation().y())
         );
 
         // Check if the start location exists
-        Location start =
-                locationRepository.findByPosition(
-                        startLocation
-                ).orElseGet(() -> {
-                    log.atInfo().log("Start location not found, creating new location");
-                    Location location = new Location();
-                    location.setPosition(startLocation);
-                    return locationRepository.save(location);
-                });
+        Location start = getOrInsertLocation(startLocation);
 
         // Check if the end location exists
-        Location end =
-                locationRepository.findByPosition(
-                        endLocation
-                ).orElseGet(() -> {
-                    log.atInfo().log("End location not found, creating new location");
-                    Location location = new Location();
-                    location.setPosition(endLocation);
-                    return locationRepository.save(location);
-                });
+        Location end = getOrInsertLocation(endLocation);
 
         // Get available status id
         RideStatus rideStatus = rideStatusRepository.findByName(RideStatusValue.AVAILABLE.name())
@@ -155,14 +145,55 @@ public class RideServiceImpl implements RideService {
         return ResponseEntity.status(HttpStatus.CREATED).body(rideResponse);
     }
 
-    private RideResponse buildRideResponse(Ride ride) {
-        return new RideResponse(
-                ride.getId(),
-                ride.getDepartureDatetime().toString(),
-                ride.getStart().getPosition().toText(),
-                ride.getEnd().getPosition().toText(),
-                ride.getAvailableSeats(),
-                ride.getCostPerSeat()
-        );
+    @Override
+    @Transactional
+    public ResponseEntity<RideResponse> updateRide(Long rideId, UpdateRideRequest updateRideRequest)
+            throws RideNotFoundException {
+        // TODO: Implement authorization check and obtain driver id from security context
+        Ride ride = rideRepository.findById(rideId).orElseThrow(
+                () -> new RideNotFoundException("Ride not found"));
+
+        if(!Objects.equals(ride.getDriver().getId(), updateRideRequest.driverId())) {
+            throw new UnauthorizedDriverException("Driver is not authorized to update this ride");
+        }
+
+        // Update ride if it is not null
+        if(updateRideRequest.departureDateTime() != null) {
+            ride.setDepartureDatetime(Instant.parse(updateRideRequest.departureDateTime()));
+        }
+
+        if(updateRideRequest.availableSeats() != null) {
+            ride.setAvailableSeats(updateRideRequest.availableSeats());
+        }
+
+        if(updateRideRequest.costPerSeat() != null) {
+            ride.setCostPerSeat(updateRideRequest.costPerSeat());
+        }
+
+        if(updateRideRequest.rideDescription() != null) {
+            ride.setRideDescription(updateRideRequest.rideDescription());
+        }
+
+        if(updateRideRequest.start() != null) {
+            Point startLocation = geometryFactory.createPoint(
+                    new Coordinate(updateRideRequest.start().x(),
+                            updateRideRequest.start().y())
+            );
+            Location start = getOrInsertLocation(startLocation);
+            ride.setStart(start);
+        }
+
+        if(updateRideRequest.end() != null) {
+            Point endLocation = geometryFactory.createPoint(
+                    new Coordinate(updateRideRequest.end().x(),
+                            updateRideRequest.end().y())
+            );
+            Location end = getOrInsertLocation(endLocation);
+            ride.setEnd(end);
+        }
+
+        rideRepository.save(ride);
+        RideResponse rideResponse = buildRideResponse(ride);
+        return ResponseEntity.ok(rideResponse);
     }
 }

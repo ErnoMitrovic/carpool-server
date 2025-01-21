@@ -3,6 +3,7 @@ package de.htwsaar.carpool.controller;
 import de.htwsaar.carpool.domain.ride.CreateRideRequest;
 import de.htwsaar.carpool.domain.ride.GetRidesRequest;
 import de.htwsaar.carpool.domain.ride.RideResponse;
+import de.htwsaar.carpool.domain.ride.UpdateRideRequest;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import de.htwsaar.carpool.service.RideService;
@@ -65,5 +66,25 @@ public class RideController {
     public ResponseEntity<RideResponse> createRide(@Valid @RequestBody CreateRideRequest createRideRequest)
             throws DriverNotFoundException {
         return rideService.createRide(createRideRequest);
+    }
+
+    @Operation(summary = "Update a carpool ride")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully updated ride",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = UpdateRideRequest.class)
+                            )
+                    }
+            )
+    })
+    @PutMapping("/{rideId}")
+    public ResponseEntity<RideResponse> updateRide(@PathVariable Long rideId,
+                                                   @Valid @RequestBody UpdateRideRequest updateRideRequest)
+            throws RideNotFoundException {
+        return rideService.updateRide(rideId, updateRideRequest);
     }
 }
