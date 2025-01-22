@@ -15,7 +15,7 @@ import de.htwsaar.carpool.repository.LocationRepository;
 import de.htwsaar.carpool.repository.RideRepository;
 import de.htwsaar.carpool.repository.RideStatusRepository;
 import de.htwsaar.carpool.repository.UserRepository;
-import de.htwsaar.carpool.service.RideServiceImpl;
+import de.htwsaar.carpool.service.impl.RideServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.locationtech.jts.geom.Coordinate;

@@ -1,4 +1,4 @@
-package de.htwsaar.carpool.service;
+package de.htwsaar.carpool.service.impl;
 
 import de.htwsaar.carpool.domain.ride.*;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
@@ -13,6 +13,7 @@ import de.htwsaar.carpool.repository.LocationRepository;
 import de.htwsaar.carpool.repository.RideRepository;
 import de.htwsaar.carpool.repository.RideStatusRepository;
 import de.htwsaar.carpool.repository.UserRepository;
+import de.htwsaar.carpool.service.RideService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -20,6 +21,7 @@ public class Message {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @CreationTimestamp
     @NotNull
     @Column(name = "\"timestamp\"", nullable = false)
     private Instant timestamp;
@@ -40,7 +42,7 @@ public class Message {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ride_id", nullable = false)
-    private de.htwsaar.carpool.model.Ride ride;
+    private Ride ride;
 
 
     @NotNull
