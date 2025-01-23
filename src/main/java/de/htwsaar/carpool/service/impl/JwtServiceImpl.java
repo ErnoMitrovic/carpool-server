@@ -4,45 +4,42 @@ import de.htwsaar.carpool.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
+import java.util.Collection;
 import java.util.Date;
 
 @Component
 public class JwtServiceImpl implements JwtService {
     @Value("${security.jwt.secret}")
     private String jwtSecret;
-    private final long jwtExpiration = 86400000; // 24 hours
-    private final String algorithm = "HmacSHA512";
 
-    private SecretKey getSigningKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(algorithm);
-        byte[] keyBytes = Decoders.BASE64.decode(this.jwtSecret);
-        return keyFactory.generateSecret(new SecretKeySpec(keyBytes, algorithm));
+    private SecretKey getSecretKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String email, String role)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+    @Override
+    public String generateToken(String email, Collection<String> roles) {
+        // 24 hours
+        long jwtExpiration = 86400000;
+
         return Jwts.builder()
                 .subject(email)
-                .claim("role", role)
+                .signWith(getSecretKey())
+                .claim("roles", roles)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(getSigningKey())
                 .compact();
     }
 
     @Override
-    public String getEmailFromToken(String token)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public String getEmailFromToken(String token) {
         Claims claims = (Claims) Jwts.parser()
-                .verifyWith(getSigningKey())
+                .verifyWith(getSecretKey())
                 .build()
                 .parse(token)
                 .getPayload();
@@ -51,10 +48,9 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String getRoleFromToken(String token)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public String getRoleFromToken(String token) {
         Claims claims = (Claims) Jwts.parser()
-                .verifyWith(getSigningKey())
+                .verifyWith(getSecretKey())
                 .build()
                 .parse(token)
                 .getPayload();
@@ -65,7 +61,7 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().verifyWith(getSigningKey()).build().parse(token);
+            Jwts.parser().verifyWith(getSecretKey()).build().parse(token);
             return true;
         } catch (Exception e) {
             return false;

@@ -1,6 +1,7 @@
 package de.htwsaar.carpool.service;
 
 import de.htwsaar.carpool.domain.user.RegisterUserRequest;
+import de.htwsaar.carpool.domain.user.TokenResponse;
 import de.htwsaar.carpool.domain.user.UserRole;
 import de.htwsaar.carpool.exceptions.EmailExistsException;
 import de.htwsaar.carpool.exceptions.InvalidCredentialsException;
@@ -19,7 +20,7 @@ public interface UserService extends UserDetailsService {
      * @return A response entity with a status code
      */
     @Transactional
-    ResponseEntity<Void> registerUser(RegisterUserRequest registerUserRequest, UserRole userRole)
+    ResponseEntity<TokenResponse> registerUser(RegisterUserRequest registerUserRequest, UserRole userRole)
             throws EmailExistsException;
 
     /**

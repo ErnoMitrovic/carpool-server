@@ -1,6 +1,6 @@
 package de.htwsaar.carpool.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import de.htwsaar.carpool.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -13,23 +13,21 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    @Value("${api.version}")
-    private String apiVersion;
-
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, UserService userService) throws Exception {
         http
                 .csrf(
                         AbstractHttpConfigurer::disable
                 )
                 .authorizeHttpRequests(
                         authorizeRequests -> authorizeRequests
-                                .requestMatchers("/api/" + apiVersion + "/auth/**",
-                                        "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                //.requestMatchers("/", "/api/${}/auth/**",
+                                 //       "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 //.requestMatchers(
                                   //      "/v3/api-docs/**").hasRole("DEVELOPER")
-                                .anyRequest().authenticated()
-                );
+                                .anyRequest().permitAll()
+                )
+                .userDetailsService(userService);
         return http.build();
     }
 
