@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.service.impl;
 
+import de.htwsaar.carpool.domain.user.CarpoolUserDetail;
 import de.htwsaar.carpool.domain.user.TokenResponse;
 import de.htwsaar.carpool.service.AuthService;
 import de.htwsaar.carpool.service.JwtService;
@@ -9,11 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 
 @Component
 public class AuthServiceImpl implements AuthService {
@@ -26,13 +23,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<TokenResponse> login(String email, String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public ResponseEntity<TokenResponse> login(String email, String password) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
         );
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        CarpoolUserDetail userDetails = (CarpoolUserDetail) authentication.getPrincipal();
         String jwt = jwtService.generateToken(
+                userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList()
         );

@@ -80,10 +80,10 @@ public class RideServiceImpl implements RideService {
     public ResponseEntity<List<RideResponse>> getFilteredRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
 
         List<RideResponse> rides = rideRepository.findAvailableRides(
-                getRidesRequest.getStartLocation().getX(),
-                getRidesRequest.getStartLocation().getY(),
-                getRidesRequest.getEndLocation().getX(),
-                getRidesRequest.getEndLocation().getY(),
+                getRidesRequest.getStartLocation().x(),
+                getRidesRequest.getStartLocation().y(),
+                getRidesRequest.getEndLocation().x(),
+                getRidesRequest.getEndLocation().y(),
                 getRidesRequest.getRadius(),
                 getRidesRequest.getSeats(),
                 getRidesRequest.getDepartureTime()

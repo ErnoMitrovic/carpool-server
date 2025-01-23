@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.service;
 
+import de.htwsaar.carpool.domain.user.CarpoolUserDetail;
 import de.htwsaar.carpool.domain.user.RegisterUserRequest;
 import de.htwsaar.carpool.domain.user.TokenResponse;
 import de.htwsaar.carpool.domain.user.UserRole;
@@ -7,7 +8,6 @@ import de.htwsaar.carpool.exceptions.EmailExistsException;
 import de.htwsaar.carpool.exceptions.InvalidCredentialsException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +26,9 @@ public interface UserService extends UserDetailsService {
     /**
      * Load a user by their email
      * @param email The email of the user
-     * @return The user details
+     * @return The user details with the correct format for optimization
      * @throws InvalidCredentialsException If the user does not exist
      */
-    UserDetails loadUserByUsername(String email)
+    CarpoolUserDetail loadUserByUsername(String email)
             throws InvalidCredentialsException;
 }

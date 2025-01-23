@@ -43,8 +43,8 @@ public class RideController {
                     }
             )
     })
-    @GetMapping("/")
-    public ResponseEntity<List<RideResponse>> searchRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
+    @PostMapping("/search/")
+    public ResponseEntity<List<RideResponse>> searchRides(@Valid @RequestBody GetRidesRequest getRidesRequest) throws RideNotFoundException {
         return rideService.getFilteredRides(getRidesRequest);
     }
 

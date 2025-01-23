@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.service.impl;
 
+import de.htwsaar.carpool.domain.user.PrincipalUser;
 import de.htwsaar.carpool.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtServiceImpl implements JwtService {
@@ -23,39 +25,35 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateToken(String email, Collection<String> roles) {
+    public String generateToken(Long id, String email, Collection<String> roles) {
         // 24 hours
         long jwtExpiration = 86400000;
 
         return Jwts.builder()
-                .subject(email)
+                .subject(String.valueOf(id))
                 .signWith(getSecretKey())
-                .claim("roles", roles)
+                .claims()
+                .add("email", email)
+                .add("roles", roles)
+                .and()
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .compact();
     }
 
     @Override
-    public String getEmailFromToken(String token) {
+    public PrincipalUser getUserFromToken(String token) {
         Claims claims = (Claims) Jwts.parser()
                 .verifyWith(getSecretKey())
                 .build()
                 .parse(token)
                 .getPayload();
 
-        return claims.getSubject();
-    }
-
-    @Override
-    public String getRoleFromToken(String token) {
-        Claims claims = (Claims) Jwts.parser()
-                .verifyWith(getSecretKey())
-                .build()
-                .parse(token)
-                .getPayload();
-
-        return claims.get("role", String.class);
+        return new PrincipalUser(
+                Integer.parseInt(claims.getSubject()),
+                claims.get("email", String.class),
+                (String) claims.get("roles", List.class).get(0)
+        );
     }
 
     @Override

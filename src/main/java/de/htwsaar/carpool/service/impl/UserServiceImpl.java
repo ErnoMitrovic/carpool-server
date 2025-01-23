@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.service.impl;
 
+import de.htwsaar.carpool.domain.user.CarpoolUserDetail;
 import de.htwsaar.carpool.domain.user.RegisterUserRequest;
 import de.htwsaar.carpool.domain.user.TokenResponse;
 import de.htwsaar.carpool.domain.user.UserRole;
@@ -13,9 +14,6 @@ import de.htwsaar.carpool.service.JwtService;
 import de.htwsaar.carpool.service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -56,19 +54,27 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
-        String jwt = jwtService.generateToken(user.getEmail(), Set.of(user.getRole().getName()));
+        String jwt = jwtService.generateToken(
+                user.getId(),
+                user.getEmail(),
+                Set.of(user.getRole().getName()));
         return ResponseEntity.ok(new TokenResponse(jwt));
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws InvalidCredentialsException {
+    public CarpoolUserDetail loadUserByUsername(String email) throws InvalidCredentialsException {
         CarpoolUser user = userRepository.findByEmail(email)
                 .orElseThrow(
                         () -> new InvalidCredentialsException("Invalid email or password")
                 );
 
-        return new User(user.getEmail(), user.getPassword(),
-                AuthorityUtils.createAuthorityList(user.getRole().getName()));
+        CarpoolUserDetail carpoolUserDetail = new CarpoolUserDetail();
+        carpoolUserDetail.setPassword(user.getPassword());
+        carpoolUserDetail.setUsername(user.getEmail());
+        carpoolUserDetail.setId(user.getId());
+        carpoolUserDetail.setRoles(user.getRole().getName());
+
+        return carpoolUserDetail;
     }
 
 }
