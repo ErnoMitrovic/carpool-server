@@ -85,6 +85,27 @@
 			<version>2.2.3</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- Spring Boot Starter WebSocket -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+			<version>3.4.1</version>
+		</dependency>
+		<!-- Redisson (for Redis Pub/Sub) -->
+		<!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
+		<!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter -->
+		<dependency>
+			<groupId>org.redisson</groupId>
+			<artifactId>redisson-spring-boot-starter</artifactId>
+			<version>3.43.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310 -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.18.2</version>
+		</dependency>
 
 	</dependencies>
 

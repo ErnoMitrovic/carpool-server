@@ -8,7 +8,6 @@ import de.htwsaar.carpool.exceptions.UnauthorizedDriverException;
 import de.htwsaar.carpool.model.CarpoolUser;
 import de.htwsaar.carpool.model.Location;
 import de.htwsaar.carpool.model.Ride;
-import de.htwsaar.carpool.model.RideStatus;
 import de.htwsaar.carpool.repository.LocationRepository;
 import de.htwsaar.carpool.repository.RideRepository;
 import de.htwsaar.carpool.repository.RideStatusRepository;
@@ -123,7 +122,7 @@ public class RideServiceImpl implements RideService {
         Location end = getOrInsertLocation(endLocation);
 
         // Get available status id
-        RideStatus rideStatus = rideStatusRepository.findByName(RideStatusValue.AVAILABLE.name())
+        de.htwsaar.carpool.model.RideStatus rideStatus = rideStatusRepository.findByName(RideStatus.AVAILABLE.name())
                 .orElseThrow(() -> new RuntimeException("Ride status not found"));
 
         // Create a new ride
@@ -209,7 +208,7 @@ public class RideServiceImpl implements RideService {
             throw new UnauthorizedDriverException("Driver is not authorized to cancel this ride");
         }
 
-        ride.setRideStatus(rideStatusRepository.findByName(RideStatusValue.CANCELLED.name())
+        ride.setRideStatus(rideStatusRepository.findByName(RideStatus.CANCELLED.name())
                 .orElseThrow(() -> new StatusNotFound("Ride status not found")));
 
         rideRepository.save(ride);
