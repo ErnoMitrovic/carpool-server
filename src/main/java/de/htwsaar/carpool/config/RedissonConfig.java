@@ -28,7 +28,6 @@ public class RedissonConfig {
     public RedissonClient redissonClient() {
         Config config = new Config();
 
-        // Use your custom ObjectMapper in JsonJacksonCodec
         JsonJacksonCodec codec = new JsonJacksonCodec(objectMapper);
 
         config.setCodec(codec); // Set the custom codec
