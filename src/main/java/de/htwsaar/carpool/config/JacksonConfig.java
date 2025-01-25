@@ -14,7 +14,7 @@ public class JacksonConfig {
         ObjectMapper mapper = new ObjectMapper();
         // Register Java Time Module for Java 8 date/time types
         mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // Optional: Use ISO-8601 format
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // Use ISO-8601 format
         return mapper;
     }
 
