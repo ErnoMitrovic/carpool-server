@@ -1,7 +1,6 @@
 package de.htwsaar.carpool.config;
 
 import de.htwsaar.carpool.service.JwtService;
-import de.htwsaar.carpool.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +19,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final UserService userService;
     private final String HEADER_PREFIX = "Bearer ";
 
 

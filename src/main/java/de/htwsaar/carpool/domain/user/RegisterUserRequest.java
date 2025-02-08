@@ -3,6 +3,7 @@ package de.htwsaar.carpool.domain.user;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
 import java.io.Serializable;
 
@@ -13,6 +14,7 @@ import java.io.Serializable;
  * @param phone
  * @param universityId
  */
+@Builder
 public record RegisterUserRequest (
         @NotNull
         String name,
@@ -23,6 +25,6 @@ public record RegisterUserRequest (
         @NotNull
         Integer phone,
         @NotNull
-        Integer universityId
+        Long universityId
 ) implements Serializable {
 }

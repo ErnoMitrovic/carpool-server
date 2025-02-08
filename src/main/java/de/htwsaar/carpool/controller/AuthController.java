@@ -3,7 +3,7 @@ package de.htwsaar.carpool.controller;
 import de.htwsaar.carpool.domain.user.LoginRequest;
 import de.htwsaar.carpool.domain.user.RegisterUserRequest;
 import de.htwsaar.carpool.domain.user.TokenResponse;
-import de.htwsaar.carpool.domain.user.UserRole;
+import de.htwsaar.carpool.domain.user.UserRoleValue;
 import de.htwsaar.carpool.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,12 +25,34 @@ public class AuthController {
     @Operation(summary = "Register a driver to the system")
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "204"
+                    responseCode = "201"
             )
     })
     @PostMapping("/driver/")
     public ResponseEntity<TokenResponse> registerDriver(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
-        return userService.registerUser(registerUserRequest, UserRole.DRIVER);
+        return userService.registerUser(registerUserRequest, UserRoleValue.DRIVER);
+    }
+
+    @Operation(summary = "Register a driver to the system")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201"
+            )
+    })
+    @PostMapping("/user/")
+    public ResponseEntity<TokenResponse> registerUser(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
+        return userService.registerUser(registerUserRequest, UserRoleValue.USER);
+    }
+
+    @Operation(summary = "Register a driver to the system")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201"
+            )
+    })
+    @PostMapping("/admin/")
+    public ResponseEntity<TokenResponse> registerAdmin(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
+        return userService.registerUser(registerUserRequest, UserRoleValue.ADMIN);
     }
 
     @Operation(summary = "Get a json web token")

@@ -3,7 +3,6 @@ package de.htwsaar.carpool.config;
 import de.htwsaar.carpool.exceptions.InvalidCredentialsException;
 import de.htwsaar.carpool.model.CarpoolUser;
 import de.htwsaar.carpool.repository.UserRepository;
-import de.htwsaar.carpool.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -20,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, UserService userService, JwtAuthFilter jwtAuthFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, UserDetailsService userDetailsService, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
                 .csrf(
                         AbstractHttpConfigurer::disable
@@ -34,7 +33,8 @@ public class SecurityConfig {
                                   //      "/v3/api-docs/**").hasRole("DEVELOPER")
                                 .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .userDetailsService(userDetailsService);
         return http.build();
     }
 

@@ -2,7 +2,7 @@ package de.htwsaar.carpool.service;
 
 import de.htwsaar.carpool.domain.user.RegisterUserRequest;
 import de.htwsaar.carpool.domain.user.TokenResponse;
-import de.htwsaar.carpool.domain.user.UserRole;
+import de.htwsaar.carpool.domain.user.UserRoleValue;
 import de.htwsaar.carpool.exceptions.EmailExistsException;
 import de.htwsaar.carpool.exceptions.InvalidCredentialsException;
 import jakarta.transaction.Transactional;
@@ -18,7 +18,7 @@ public interface UserService {
      * @return A response entity with a status code
      */
     @Transactional
-    ResponseEntity<TokenResponse> registerUser(RegisterUserRequest registerUserRequest, UserRole userRole)
+    ResponseEntity<TokenResponse> registerUser(RegisterUserRequest registerUserRequest, UserRoleValue userRole)
             throws EmailExistsException;
 
     /**
