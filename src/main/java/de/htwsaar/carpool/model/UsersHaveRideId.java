@@ -18,11 +18,11 @@ public class UsersHaveRideId implements java.io.Serializable {
     private static final long serialVersionUID = -5571980444741560409L;
     @NotNull
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    private Long userId;
 
     @NotNull
     @Column(name = "ride_id", nullable = false)
-    private Integer rideId;
+    private Long rideId;
 
     @Override
     public boolean equals(Object o) {

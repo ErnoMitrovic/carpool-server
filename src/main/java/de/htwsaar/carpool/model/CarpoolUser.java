@@ -36,11 +36,11 @@ public class CarpoolUser {
 
     @NotNull
     @Column(name = "university_id", nullable = false)
-    private Integer universityId;
+    private Long universityId;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
+    private UserRole role;
 
 }
