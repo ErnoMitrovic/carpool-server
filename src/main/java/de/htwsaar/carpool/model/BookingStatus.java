@@ -15,7 +15,7 @@ public class BookingStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "booking_status_id_seq")
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Size(max = 20)
     @NotNull

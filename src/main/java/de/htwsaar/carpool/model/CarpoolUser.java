@@ -47,13 +47,14 @@ public class CarpoolUser {
     @Column(name = "phone", nullable = false)
     private Integer phone;
 
-    @Column(name = "university_id")
-    private Integer universityId;
+    @NotNull
+    @Column(name = "university_id", nullable = false)
+    private Long universityId;
 
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
+    private UserRole role;
 
     @CreationTimestamp
     @Column(name = "created_at")

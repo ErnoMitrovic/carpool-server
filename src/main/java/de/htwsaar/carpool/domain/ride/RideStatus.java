@@ -1,6 +1,6 @@
 package de.htwsaar.carpool.domain.ride;
 
-public enum RideStatusValue {
+public enum RideStatus {
     AVAILABLE,
     FULL,
     CANCELLED
