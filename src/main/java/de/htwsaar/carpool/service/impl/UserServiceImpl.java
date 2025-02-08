@@ -1,6 +1,5 @@
 package de.htwsaar.carpool.service.impl;
 
-import de.htwsaar.carpool.domain.user.CarpoolUserDetail;
 import de.htwsaar.carpool.domain.user.RegisterUserRequest;
 import de.htwsaar.carpool.domain.user.TokenResponse;
 import de.htwsaar.carpool.domain.user.UserRole;
@@ -56,25 +55,23 @@ public class UserServiceImpl implements UserService {
 
         String jwt = jwtService.generateToken(
                 user.getId(),
-                user.getEmail(),
                 Set.of(user.getRole().getName()));
         return ResponseEntity.ok(new TokenResponse(jwt));
     }
 
     @Override
-    public CarpoolUserDetail loadUserByUsername(String email) throws InvalidCredentialsException {
+    public ResponseEntity<TokenResponse> loginUser(String email, String password) throws InvalidCredentialsException {
         CarpoolUser user = userRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new InvalidCredentialsException("Invalid email or password")
-                );
+                .orElseThrow(InvalidCredentialsException::new);
 
-        CarpoolUserDetail carpoolUserDetail = new CarpoolUserDetail();
-        carpoolUserDetail.setPassword(user.getPassword());
-        carpoolUserDetail.setUsername(user.getEmail());
-        carpoolUserDetail.setId(user.getId());
-        carpoolUserDetail.setRoles(user.getRole().getName());
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new InvalidCredentialsException();
+        }
 
-        return carpoolUserDetail;
+        String jwt = jwtService.generateToken(
+                user.getId(),
+                Set.of(user.getRole().getName()));
+        return ResponseEntity.ok(new TokenResponse(jwt));
     }
 
 }

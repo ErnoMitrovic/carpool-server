@@ -68,8 +68,7 @@ public class RideServiceTest {
                 10.50f,
                 new PointDTO(-74.0060, 40.7128),
                 new PointDTO(-118.2437, 34.0522),
-                "A sample ride",
-                1L
+                "A sample ride"
         );
 
         CarpoolUser driver = new CarpoolUser();
@@ -102,7 +101,7 @@ public class RideServiceTest {
         when(rideRepository.save(any(Ride.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Call the method
-        ResponseEntity<RideResponse> response = rideService.createRide(request);
+        ResponseEntity<RideResponse> response = rideService.createRide(request, 1L);
 
         // Verify response
         assertNotNull(response);
@@ -122,14 +121,13 @@ public class RideServiceTest {
                 10.50f,
                 new PointDTO(-74.0060, 40.7128),
                 new PointDTO(-118.2437, 34.0522),
-                "A sample ride",
-                2L
+                "A sample ride"
         );
 
         when(userRepository.findById(2L)).thenReturn(Optional.empty());
 
         try {
-            rideService.createRide(request);
+            rideService.createRide(request, 1L);
         } catch (DriverNotFoundException e) {
             assertEquals("Driver not found", e.getMessage());
         }
@@ -158,8 +156,7 @@ public class RideServiceTest {
                 15.0f,
                 "Updated description",
                 new PointDTO(start.getX(), end.getY()),
-                new PointDTO(end.getX(), end.getY()),
-                1L
+                new PointDTO(end.getX(), end.getY())
         );
 
         when(rideRepository.findById(1L)).thenReturn(Optional.of(ride));
@@ -167,7 +164,7 @@ public class RideServiceTest {
         when(locationRepository.findByPosition(any(Point.class))).thenReturn(Optional.empty());
         when(locationRepository.save(any(Location.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ResponseEntity<RideResponse> response = rideService.updateRide(1L, request);
+        ResponseEntity<RideResponse> response = rideService.updateRide(1L, request, 1L);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

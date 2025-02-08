@@ -1,11 +1,16 @@
 package de.htwsaar.carpool.config;
 
+import de.htwsaar.carpool.exceptions.InvalidCredentialsException;
+import de.htwsaar.carpool.model.CarpoolUser;
+import de.htwsaar.carpool.repository.UserRepository;
 import de.htwsaar.carpool.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,6 +25,7 @@ public class SecurityConfig {
                 .csrf(
                         AbstractHttpConfigurer::disable
                 )
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorizeRequests -> authorizeRequests
                                 .requestMatchers("/", "/api/{version}/auth/**",
@@ -28,8 +34,7 @@ public class SecurityConfig {
                                   //      "/v3/api-docs/**").hasRole("DEVELOPER")
                                 .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .userDetailsService(userService);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -45,8 +50,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Profile("!prod")
+    @Profile({"dev", "test"})
     public PasswordEncoder devPasswordEncoder() {
         return new BCryptPasswordEncoder(4);
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(UserRepository repository) {
+        return email -> {
+            CarpoolUser carpoolUser = repository.findByEmail(email).orElseThrow(InvalidCredentialsException::new);
+            return User.withUsername(String.valueOf(carpoolUser.getId()))
+                    .authorities(carpoolUser.getRole().getName())
+                    .accountExpired(!carpoolUser.getIsActive())
+                    .credentialsExpired(!carpoolUser.getIsActive())
+                    .disabled(!carpoolUser.getIsActive())
+                    .accountLocked(!carpoolUser.getIsActive()).build();
+        };
     }
 }

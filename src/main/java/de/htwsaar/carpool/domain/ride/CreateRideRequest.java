@@ -18,8 +18,6 @@ public record CreateRideRequest(
         @NotNull
         PointDTO endLocation,
         @NotNull
-        String rideDescription,
-        @NotNull
-        Long driverId // TODO: Extract from authentication
+        String rideDescription
 ) {
 }

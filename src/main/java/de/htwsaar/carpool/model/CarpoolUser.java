@@ -1,13 +1,13 @@
 package de.htwsaar.carpool.model;
 
+import jakarta.persistence.Table;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import java.time.Instant;
 
@@ -18,6 +18,8 @@ import java.time.Instant;
         @UniqueConstraint(name = "user_ak_1", columnNames = {"email"}),
         @UniqueConstraint(name = "user_ak_2", columnNames = {"phone"})
 })
+@SQLDelete(sql = "UPDATE carpool_user SET is_active = false WHERE id=?")
+@SQLRestriction("is_active=true")
 @SequenceGenerator(name = "carpool_user_id_seq", sequenceName = "carpool_user_id_seq", allocationSize = 1)
 public class CarpoolUser {
     @Id
@@ -60,5 +62,10 @@ public class CarpoolUser {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @NotNull
+    @ColumnDefault("true")
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = false;
 
 }

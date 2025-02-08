@@ -100,10 +100,10 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest)
+    public ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest, Long driverId)
             throws DriverNotFoundException {
         // Check if the driver exists
-        CarpoolUser driver = userRepository.findById(createRideRequest.driverId()).orElseThrow(
+        CarpoolUser driver = userRepository.findById(driverId).orElseThrow(
                 () -> new DriverNotFoundException("Driver not found")
         );
 
@@ -149,13 +149,13 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public ResponseEntity<RideResponse> updateRide(Long rideId, UpdateRideRequest updateRideRequest)
+    public ResponseEntity<RideResponse> updateRide(Long rideId, UpdateRideRequest updateRideRequest, Long driverId)
             throws RideNotFoundException {
         // TODO: Implement authorization check and obtain driver id from security context
         Ride ride = rideRepository.findById(rideId).orElseThrow(
                 () -> new RideNotFoundException("Ride not found"));
 
-        if(!Objects.equals(ride.getDriver().getId(), updateRideRequest.driverId())) {
+        if(!Objects.equals(ride.getDriver().getId(), driverId)) {
             throw new UnauthorizedDriverException("Driver is not authorized to update this ride");
         }
 

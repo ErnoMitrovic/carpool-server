@@ -40,8 +40,7 @@ public class RideControllerTest {
                 15.0f,
                 "Updated description",
                 null,
-                null,
-                1L);
+                null);
 
         RideResponse rideResponse = new RideResponse(
                 1L,
@@ -51,7 +50,7 @@ public class RideControllerTest {
                 4,
                 15.0f);
 
-        when(rideService.updateRide(anyLong(), any(UpdateRideRequest.class)))
+        when(rideService.updateRide(anyLong(), any(UpdateRideRequest.class), any()))
                 .thenReturn(ResponseEntity.ok(rideResponse));
 
         mockMvc.perform(put("/ride/1")
