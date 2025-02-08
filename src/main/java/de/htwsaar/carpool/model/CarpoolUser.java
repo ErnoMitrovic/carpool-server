@@ -67,6 +67,6 @@ public class CarpoolUser {
     @NotNull
     @ColumnDefault("true")
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive = false;
+    private Boolean isActive = true;
 
 }

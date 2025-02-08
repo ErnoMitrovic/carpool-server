@@ -27,12 +27,11 @@ public class Message {
 
     @CreationTimestamp
     @NotNull
-    @Column(name = "\"timestamp\"", nullable = false)
+    @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 
     @NotNull
-    @Lob
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @NotNull

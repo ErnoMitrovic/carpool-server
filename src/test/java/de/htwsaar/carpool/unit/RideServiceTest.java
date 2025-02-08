@@ -127,7 +127,7 @@ public class RideServiceTest {
         when(userRepository.findById(2L)).thenReturn(Optional.empty());
 
         try {
-            rideService.createRide(request, 1L);
+            rideService.createRide(request, 2L);
         } catch (DriverNotFoundException e) {
             assertEquals("Driver not found", e.getMessage());
         }

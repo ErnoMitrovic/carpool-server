@@ -19,7 +19,7 @@ public class Location {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "\"position\"", columnDefinition = "geometry(Point, " + Constants.SRID + ")",
+    @Column(name = "position", columnDefinition = "geometry(Point, " + Constants.SRID + ")",
             nullable = false)
     private Point position;
 }
