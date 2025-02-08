@@ -3,7 +3,6 @@ package de.htwsaar.carpool.domain.ride;
 import de.htwsaar.carpool.domain.location.PointDTO;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import java.io.Serializable;
@@ -31,8 +30,6 @@ public record UpdateRideRequest(
         @NotBlank
         String rideDescription,
         PointDTO start,
-        PointDTO end,
-        @NotNull
-        Long driverId // TODO: Extract from authentication
+        PointDTO end
 ) implements Serializable {
 }

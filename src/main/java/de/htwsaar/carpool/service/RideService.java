@@ -28,11 +28,12 @@ public interface RideService {
     /**
      * As a driver, I want to create a carpool ride with details like departure time, destination, available seats,
      * @param createRideRequest CreateRideRequest DTO
+     * @param driverId the driver that owns this ride
      * @return ResponseEntity<RideResponse> RideResponse DTO
      * @throws DriverNotFoundException DriverNotFoundException if driver is not found
      */
     @Transactional
-    ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest)
+    ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest, Long driverId)
             throws DriverNotFoundException;
 
     /**
@@ -40,11 +41,12 @@ public interface RideService {
      * If a location is updated, and it doesn't exist in the database, it should be added.
      * @param rideId Ride ID
      * @param updateRideRequest UpdateRideRequest DTO
+     * @param driverId the driver that owns this ride
      * @return ResponseEntity<RideResponse> RideResponse DTO
      * @throws RideNotFoundException RideNotFoundException if ride is not found
      */
     @Transactional
-    ResponseEntity<RideResponse> updateRide(Long rideId, @Valid UpdateRideRequest updateRideRequest)
+    ResponseEntity<RideResponse> updateRide(Long rideId, @Valid UpdateRideRequest updateRideRequest, Long driverId)
             throws RideNotFoundException, UnauthorizedDriverException;
 
     /**
