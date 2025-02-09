@@ -1,9 +1,9 @@
 package de.htwsaar.carpool.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.htwsaar.carpool.domain.mesage.MessageStatus;
-import de.htwsaar.carpool.domain.mesage.RecordedMessage;
-import de.htwsaar.carpool.domain.mesage.WebSocketPayload;
+import de.htwsaar.carpool.domain.message.MessageStatus;
+import de.htwsaar.carpool.domain.message.RecordedMessage;
+import de.htwsaar.carpool.domain.message.WebSocketPayload;
 import org.redisson.api.RList;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
@@ -62,7 +62,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             // Subscribe to the Redis topic and define a listener to handle incoming messages
             int listenerId = topic.addListener(String.class, (channel, msg) -> {
                 try {
-                    if (session.isOpen()) session.sendMessage(new TextMessage(objectMapper.writeValueAsString(msg)));
+                    if (session.isOpen()) session.sendMessage(new TextMessage(msg));
                 } catch (IOException e) {
                     System.err.println("Failed to send message to WebSocket session: " + e.getMessage());
                 }

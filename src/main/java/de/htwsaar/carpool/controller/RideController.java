@@ -38,10 +38,11 @@ public class RideController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = GetRidesRequest.class)
+                                    schema = @Schema(implementation = RideResponse.class)
                             )
                     }
-            )
+            ),
+            @ApiResponse(responseCode = "404", description = "No rides found")
     })
     @GetMapping("/")
     public ResponseEntity<List<RideResponse>> searchRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
@@ -58,7 +59,7 @@ public class RideController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = CreateRideRequest.class)
+                                    schema = @Schema(implementation = RideResponse.class)
                             )
                     }
             )
@@ -77,7 +78,7 @@ public class RideController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = UpdateRideRequest.class)
+                                    schema = @Schema(implementation = RideResponse.class)
                             )
                     }
             )
@@ -96,8 +97,7 @@ public class RideController {
                     description = "Successfully deleted ride",
                     content = {
                             @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Long.class)
+                                    mediaType = "application/json"
                             )
                     }
             )
