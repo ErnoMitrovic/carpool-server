@@ -1,4 +1,4 @@
-package de.htwsaar.carpool.service;
+package de.htwsaar.carpool.service.impl;
 
 import de.htwsaar.carpool.domain.ride.*;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
@@ -12,6 +12,7 @@ import de.htwsaar.carpool.repository.LocationRepository;
 import de.htwsaar.carpool.repository.RideRepository;
 import de.htwsaar.carpool.repository.RideStatusRepository;
 import de.htwsaar.carpool.repository.UserRepository;
+import de.htwsaar.carpool.service.RideService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
@@ -78,10 +79,10 @@ public class RideServiceImpl implements RideService {
     public ResponseEntity<List<RideResponse>> getFilteredRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
 
         List<RideResponse> rides = rideRepository.findAvailableRides(
-                getRidesRequest.getStartLocation().getX(),
-                getRidesRequest.getStartLocation().getY(),
-                getRidesRequest.getEndLocation().getX(),
-                getRidesRequest.getEndLocation().getY(),
+                getRidesRequest.getStartLocation().x(),
+                getRidesRequest.getStartLocation().y(),
+                getRidesRequest.getEndLocation().x(),
+                getRidesRequest.getEndLocation().y(),
                 getRidesRequest.getRadius(),
                 getRidesRequest.getSeats(),
                 getRidesRequest.getDepartureTime()
@@ -98,10 +99,10 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest)
+    public ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest, Long driverId)
             throws DriverNotFoundException {
         // Check if the driver exists
-        CarpoolUser driver = userRepository.findById(createRideRequest.driverId()).orElseThrow(
+        CarpoolUser driver = userRepository.findById(driverId).orElseThrow(
                 () -> new DriverNotFoundException("Driver not found")
         );
 
@@ -147,13 +148,13 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public ResponseEntity<RideResponse> updateRide(Long rideId, UpdateRideRequest updateRideRequest)
+    public ResponseEntity<RideResponse> updateRide(Long rideId, UpdateRideRequest updateRideRequest, Long driverId)
             throws RideNotFoundException {
         // TODO: Implement authorization check and obtain driver id from security context
         Ride ride = rideRepository.findById(rideId).orElseThrow(
                 () -> new RideNotFoundException("Ride not found"));
 
-        if(!Objects.equals(ride.getDriver().getId(), updateRideRequest.driverId())) {
+        if(!Objects.equals(ride.getDriver().getId(), driverId)) {
             throw new UnauthorizedDriverException("Driver is not authorized to update this ride");
         }
 

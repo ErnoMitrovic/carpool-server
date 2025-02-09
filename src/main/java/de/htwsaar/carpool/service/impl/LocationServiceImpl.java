@@ -1,9 +1,10 @@
-package de.htwsaar.carpool.service;
+package de.htwsaar.carpool.service.impl;
 
 import de.htwsaar.carpool.domain.location.CreateLocationRequest;
 import de.htwsaar.carpool.domain.location.LocationResponse;
 import de.htwsaar.carpool.model.Location;
 import de.htwsaar.carpool.repository.LocationRepository;
+import de.htwsaar.carpool.service.LocationService;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;

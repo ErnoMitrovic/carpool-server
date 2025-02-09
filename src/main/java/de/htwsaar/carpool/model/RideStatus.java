@@ -15,7 +15,7 @@ import lombok.Setter;
 @SequenceGenerator(name = "ride_status_id_seq", sequenceName = "ride_status_id_seq", allocationSize = 1)
 public class RideStatus {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ride_status_id_seq")
     @Column(name = "id", nullable = false)
     private Long id;
 

@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -44,8 +45,8 @@ public class RideController {
             ),
             @ApiResponse(responseCode = "404", description = "No rides found")
     })
-    @GetMapping("/")
-    public ResponseEntity<List<RideResponse>> searchRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
+    @PostMapping("/search/")
+    public ResponseEntity<List<RideResponse>> searchRides(@Valid @RequestBody GetRidesRequest getRidesRequest) throws RideNotFoundException {
         return rideService.getFilteredRides(getRidesRequest);
     }
 
@@ -65,9 +66,9 @@ public class RideController {
             )
     })
     @PostMapping("/")
-    public ResponseEntity<RideResponse> createRide(@Valid @RequestBody CreateRideRequest createRideRequest)
+    public ResponseEntity<RideResponse> createRide(@Valid @RequestBody CreateRideRequest createRideRequest, Principal principal)
             throws DriverNotFoundException {
-        return rideService.createRide(createRideRequest);
+        return rideService.createRide(createRideRequest, Long.valueOf(principal.getName()));
     }
 
     @Operation(summary = "Update a carpool ride")
@@ -85,9 +86,10 @@ public class RideController {
     })
     @PutMapping("/{rideId}")
     public ResponseEntity<RideResponse> updateRide(@PathVariable Long rideId,
-                                                   @Valid @RequestBody UpdateRideRequest updateRideRequest)
+                                                   @Valid @RequestBody UpdateRideRequest updateRideRequest,
+                                                   Principal principal)
             throws RideNotFoundException {
-        return rideService.updateRide(rideId, updateRideRequest);
+        return rideService.updateRide(rideId, updateRideRequest, Long.valueOf(principal.getName()));
     }
 
     @Operation(summary = "Delete a carpool ride by updating its status to cancelled")
@@ -103,8 +105,8 @@ public class RideController {
             )
     })
     @DeleteMapping("/{rideId}/")
-    public ResponseEntity<Void> cancelRide(@PathVariable Long rideId, @RequestParam Long driverId)
+    public ResponseEntity<Void> cancelRide(@PathVariable Long rideId, Principal driverId)
             throws RideNotFoundException, UnauthorizedDriverException {
-        return rideService.cancelRide(rideId, driverId);
+        return rideService.cancelRide(rideId, Long.valueOf(driverId.getName()));
     }
 }

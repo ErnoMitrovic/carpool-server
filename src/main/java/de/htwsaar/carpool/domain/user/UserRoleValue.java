@@ -1,6 +1,7 @@
 package de.htwsaar.carpool.domain.user;
 
-public enum UserRole {
+public enum UserRoleValue {
+    DRIVER,
     USER,
     ADMIN
 }
