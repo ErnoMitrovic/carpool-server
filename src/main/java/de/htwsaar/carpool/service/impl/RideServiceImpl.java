@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.service.impl;
 
+import de.htwsaar.carpool.domain.location.PointDTO;
 import de.htwsaar.carpool.domain.ride.*;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
@@ -14,6 +15,7 @@ import de.htwsaar.carpool.repository.RideStatusRepository;
 import de.htwsaar.carpool.repository.UserRepository;
 import de.htwsaar.carpool.service.RideService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -53,11 +55,13 @@ public class RideServiceImpl implements RideService {
     }
 
     private RideResponse buildRideResponse(Ride ride) {
+        Point startPoint = ride.getStart().getPosition();
+        Point endPoint = ride.getEnd().getPosition();
         return new RideResponse(
                 ride.getId(),
                 ride.getDepartureDatetime().toString(),
-                ride.getStart().getPosition().toText(),
-                ride.getEnd().getPosition().toText(),
+                PointDTO.builder().x(startPoint.getX()).y(startPoint.getY()).build(),
+                PointDTO.builder().x(endPoint.getX()).y(endPoint.getY()).build(),
                 ride.getAvailableSeats(),
                 ride.getCostPerSeat()
         );
@@ -76,23 +80,29 @@ public class RideServiceImpl implements RideService {
 
 
     @Override
-    public ResponseEntity<List<RideResponse>> getFilteredRides(GetRidesRequest getRidesRequest) throws RideNotFoundException {
+    public ResponseEntity<List<RideResponse>> getFilteredRides(@Valid GetRidesRequest getRidesRequest) throws RideNotFoundException {
+
+        Point startLocation = geometryFactory.createPoint(
+                new Coordinate(getRidesRequest.startLocation().x(),
+                        getRidesRequest.startLocation().y())
+        );
+
+        Point endLocation = geometryFactory.createPoint(
+                new Coordinate(getRidesRequest.startLocation().x(),
+                        getRidesRequest.startLocation().y())
+        );
 
         List<RideResponse> rides = rideRepository.findAvailableRides(
-                getRidesRequest.getStartLocation().x(),
-                getRidesRequest.getStartLocation().y(),
-                getRidesRequest.getEndLocation().x(),
-                getRidesRequest.getEndLocation().y(),
-                getRidesRequest.getRadius(),
-                getRidesRequest.getSeats(),
-                getRidesRequest.getDepartureTime()
+                startLocation,
+                endLocation,
+                getRidesRequest.radius(),
+                getRidesRequest.seats(),
+                Instant.parse(getRidesRequest.departureDateTime())
         ).stream().map(this::buildRideResponse).toList();
 
-        if(rides.isEmpty()) {
-            throw new RideNotFoundException("No rides found");
-        }
+        if(rides.isEmpty()) throw new RideNotFoundException();
 
-        log.atDebug().log("Found {} rides", rides.size());
+        log.debug("Found {} rides", rides.size());
 
         return ResponseEntity.ok(rides);
     }

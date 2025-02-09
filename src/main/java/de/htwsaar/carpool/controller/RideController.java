@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.controller;
 
+import de.htwsaar.carpool.domain.location.PointDTO;
 import de.htwsaar.carpool.domain.ride.CreateRideRequest;
 import de.htwsaar.carpool.domain.ride.GetRidesRequest;
 import de.htwsaar.carpool.domain.ride.RideResponse;
@@ -21,7 +22,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/ride")
+@RequestMapping("/api/${api.version}/ride")
 public class RideController {
     private final RideService rideService;
 
@@ -32,20 +33,32 @@ public class RideController {
     // As a user, I want to search for available carpool rides based on my destination, date, and time
     // so that I can find suitable travel options.
     @Operation(summary = "Search for available carpool rides based on destination, date, and time")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully retrieved rides",
-                    content = {
-                            @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = GetRidesRequest.class)
-                            )
-                    }
-            )
-    })
-    @PostMapping("/search/")
-    public ResponseEntity<List<RideResponse>> searchRides(@Valid @RequestBody GetRidesRequest getRidesRequest) throws RideNotFoundException {
+    @GetMapping("")
+    public ResponseEntity<List<RideResponse>> searchRides(
+            @RequestParam Double userLat,
+            @RequestParam Double userLng,
+            @RequestParam Double destLat,
+            @RequestParam Double destLng,
+            @RequestParam(required = false, defaultValue = "10") double radius,
+            @RequestParam String departureDateTime,
+            @RequestParam Integer seats
+    ) throws RideNotFoundException {
+        GetRidesRequest getRidesRequest = GetRidesRequest
+                .builder()
+                .startLocation(PointDTO
+                        .builder()
+                        .x(userLng)
+                        .y(userLat)
+                        .build())
+                .endLocation(PointDTO
+                        .builder()
+                        .x(destLng)
+                        .y(destLat)
+                        .build())
+                .seats(seats)
+                .departureDateTime(departureDateTime)
+                .radius(radius)
+                .build();
         return rideService.getFilteredRides(getRidesRequest);
     }
 

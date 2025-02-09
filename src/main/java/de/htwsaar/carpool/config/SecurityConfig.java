@@ -55,6 +55,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(4);
     }
 
+    @Profile({"dev", "prod"})
     @Bean
     public UserDetailsService userDetailsService(UserRepository repository) {
         return email -> {

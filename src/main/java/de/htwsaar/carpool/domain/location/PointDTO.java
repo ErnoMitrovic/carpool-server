@@ -1,6 +1,7 @@
 package de.htwsaar.carpool.domain.location;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
 import java.io.Serializable;
 
@@ -9,5 +10,6 @@ import java.io.Serializable;
  * @param x The x-coordinate of the point
  * @param y The y-coordinate of the point
  */
+@Builder
 public record PointDTO(@NotNull Double x, @NotNull Double y) implements Serializable {
 }
