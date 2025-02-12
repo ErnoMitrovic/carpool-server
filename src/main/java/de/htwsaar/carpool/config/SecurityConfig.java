@@ -30,10 +30,21 @@ public class SecurityConfig {
                                 .requestMatchers("/", "/api/{version}/auth/**",
                                         "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 //.requestMatchers(
-                                  //      "/v3/api-docs/**").hasRole("DEVELOPER")
+                                //      "/v3/api-docs/**").hasRole("DEVELOPER")
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
+                                (req, res, authEx) -> {
+                                    req.setAttribute("SPRING_SECURITY_EXCEPTION", authEx);
+                                    req.getRequestDispatcher(req.getServletPath()).forward(req, res);
+                                })
+                        .accessDeniedHandler(
+                                (request, response, accessDeniedException) -> {
+                                    // Let the request reach the controller to raise the correct exception
+                                    request.setAttribute("SPRING_SECURITY_EXCEPTION", accessDeniedException);
+                                    request.getRequestDispatcher(request.getServletPath()).forward(request, response);
+                                }))
                 .userDetailsService(userDetailsService);
         return http.build();
     }
@@ -41,6 +52,7 @@ public class SecurityConfig {
     /**
      * A good password encoder to use
      * In production use 12> strength
+     *
      * @return A password encoder
      */
     @Bean
