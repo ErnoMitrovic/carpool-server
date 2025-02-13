@@ -1,10 +1,14 @@
 package de.htwsaar.carpool.controller;
 
-import de.htwsaar.carpool.domain.mesage.RecordedMessage;
+import de.htwsaar.carpool.domain.message.RecordedMessage;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
 import org.redisson.api.RList;
 import org.redisson.api.RedissonClient;
-import org.redisson.client.codec.StringCodec;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +22,20 @@ public class ChatController {
 
     private final RedissonClient redissonClient;
 
+    @Operation(summary = "Retrieve chat history")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved chat history",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = RecordedMessage.class)
+                            )
+                    }
+            ),
+            @ApiResponse(responseCode = "404", description = "No chat history found")
+    })
     @GetMapping("/chat/history")
     public List<RecordedMessage> getChatHistory(@RequestParam(required = false) String rideId,
                                                 @RequestParam(required = false) String senderId,

@@ -32,9 +32,16 @@ public class LocationController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = CreateLocationRequest.class)
+                                    schema = @Schema(implementation = LocationResponse.class)
                             )
                     }
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request payload",
+                    content = @Content(
+                            mediaType = "application/json"
+                    )
             )
     })
     @PostMapping("/")

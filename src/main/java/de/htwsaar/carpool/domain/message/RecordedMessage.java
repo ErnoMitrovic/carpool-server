@@ -1,4 +1,4 @@
-package de.htwsaar.carpool.domain.mesage;
+package de.htwsaar.carpool.domain.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
