@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorizeRequests -> authorizeRequests
-                                .requestMatchers("/", "/api/{version}/auth/**",
+                                .requestMatchers("/", "/chat/**", "/api/{version}/auth/**",
                                         "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 //.requestMatchers(
                                 //      "/v3/api-docs/**").hasRole("DEVELOPER")
