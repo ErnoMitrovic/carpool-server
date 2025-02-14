@@ -17,8 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -53,7 +51,7 @@ public class ChatWebSocketTest {
 
     @BeforeAll
     static void startEmbeddedRedis() throws IOException {
-        embeddedRedis = RedisServer.newRedisServer().port(findAvailablePort()).build();
+        embeddedRedis = RedisServer.newRedisServer().build();
         embeddedRedis.start();
     }
 
@@ -62,22 +60,6 @@ public class ChatWebSocketTest {
         if (embeddedRedis != null) {
             embeddedRedis.stop();
         }
-    }
-
-    private static int findAvailablePort() {
-        try (java.net.ServerSocket socket = new java.net.ServerSocket(0)) {
-            socket.setReuseAddress(true);
-            return socket.getLocalPort();
-        } catch (IOException e) {
-            throw new RuntimeException("No available port found", e);
-        }
-    }
-
-    @DynamicPropertySource
-    static void redisProperties(DynamicPropertyRegistry registry) {
-        // Inject the Redis port dynamically
-        registry.add("spring.data.redis.host", () -> "localhost");
-        registry.add("spring.data.redis.port", () -> embeddedRedis.ports().get(0));
     }
 
     @BeforeEach

@@ -5,6 +5,7 @@ import de.htwsaar.carpool.domain.ride.RideResponse;
 import de.htwsaar.carpool.model.*;
 import de.htwsaar.carpool.repository.*;
 import de.htwsaar.carpool.service.JwtService;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +21,10 @@ import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
+import redis.embedded.RedisServer;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -72,8 +75,23 @@ public class RideControllerTest {
         return String.format("http://localhost:%d/api/%s", port, apiVersion);
     }
 
+    private static RedisServer embeddedRedis;
+
     @BeforeAll
-    static void enableH2GIS(@Autowired DataSource dataSource) throws SQLException {
+    static void enableEmbeddedRedis() throws IOException {
+        embeddedRedis = RedisServer.newRedisServer().build();
+        embeddedRedis.start();
+    }
+
+    @AfterAll
+    static void stopEmbeddedRedis() throws IOException {
+        if (embeddedRedis != null) {
+            embeddedRedis.stop();
+        }
+    }
+
+    @BeforeAll
+    static void enableH2GIS(@Autowired DataSource dataSource) throws SQLException{
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
             stmt.execute("CREATE ALIAS IF NOT EXISTS H2GIS_SPATIAL FOR \"org.h2gis.functions.factory.H2GISFunctions.load\";");
