@@ -3,6 +3,7 @@ package de.htwsaar.carpool.config;
 import de.htwsaar.carpool.exceptions.InvalidCredentialsException;
 import de.htwsaar.carpool.model.CarpoolUser;
 import de.htwsaar.carpool.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -33,18 +34,17 @@ public class SecurityConfig {
                                 //      "/v3/api-docs/**").hasRole("DEVELOPER")
                                 .anyRequest().authenticated()
                 )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"error\": \"Unauthorized - " + authException.getMessage() + "\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            throw accessDeniedException;
+                        })
+                )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
-                                (req, res, authEx) -> {
-                                    req.setAttribute("SPRING_SECURITY_EXCEPTION", authEx);
-                                    req.getRequestDispatcher(req.getServletPath()).forward(req, res);
-                                })
-                        .accessDeniedHandler(
-                                (request, response, accessDeniedException) -> {
-                                    // Let the request reach the controller to raise the correct exception
-                                    request.setAttribute("SPRING_SECURITY_EXCEPTION", accessDeniedException);
-                                    request.getRequestDispatcher(request.getServletPath()).forward(request, response);
-                                }))
                 .userDetailsService(userDetailsService);
         return http.build();
     }

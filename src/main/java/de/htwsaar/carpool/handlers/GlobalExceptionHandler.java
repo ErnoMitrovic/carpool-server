@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Profile("prod")
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralExceptionDev(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         return ResponseEntity.badRequest().body(
                 ErrorResponse.builder().message(ex.getMessage()).build()
         );

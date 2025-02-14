@@ -25,9 +25,9 @@ public class RideServiceExceptionHandler {
 
         ArrayList<Object> errorMessage = new ArrayList<>();
 
-        exception.getBindingResult().getFieldErrors().forEach(error -> {
-            errorMessage.add(error.getDefaultMessage());
-        });
+        exception.getBindingResult().getFieldErrors().forEach(error ->
+                errorMessage.add(error.getDefaultMessage())
+        );
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(errorMessage.toString()));
     }
