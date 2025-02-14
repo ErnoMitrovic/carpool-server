@@ -3,6 +3,7 @@ package de.htwsaar.carpool.config;
 import de.htwsaar.carpool.exceptions.InvalidCredentialsException;
 import de.htwsaar.carpool.model.CarpoolUser;
 import de.htwsaar.carpool.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -27,11 +28,21 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorizeRequests -> authorizeRequests
-                                .requestMatchers("/", "/api/{version}/auth/**",
+                                .requestMatchers("/", "/chat/**", "/api/{version}/auth/**",
                                         "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 //.requestMatchers(
-                                  //      "/v3/api-docs/**").hasRole("DEVELOPER")
+                                //      "/v3/api-docs/**").hasRole("DEVELOPER")
                                 .anyRequest().authenticated()
+                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"error\": \"Unauthorized - " + authException.getMessage() + "\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            throw accessDeniedException;
+                        })
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(userDetailsService);
@@ -41,6 +52,7 @@ public class SecurityConfig {
     /**
      * A good password encoder to use
      * In production use 12> strength
+     *
      * @return A password encoder
      */
     @Bean
@@ -55,6 +67,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(4);
     }
 
+    @Profile({"dev", "prod"})
     @Bean
     public UserDetailsService userDetailsService(UserRepository repository) {
         return email -> {
