@@ -20,6 +20,8 @@ before_script:
   - mvn -version
 
 build:
+  tags:
+    - testing
   stage: build
   script:
     - mvn clean compile
@@ -29,6 +31,8 @@ build:
 
 test:
   stage: test
+  tags:
+    - testing
   script:
     - mvn test
   artifacts:
