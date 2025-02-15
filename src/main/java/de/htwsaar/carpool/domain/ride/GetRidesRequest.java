@@ -21,6 +21,5 @@ public record GetRidesRequest(
         @NotNull
         PointDTO startLocation,
         @NotNull
-        PointDTO endLocation,
-        int seats) implements Serializable {
+        PointDTO endLocation) implements Serializable {
 }

@@ -10,10 +10,6 @@ import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import de.htwsaar.carpool.exceptions.UnauthorizedDriverException;
 import de.htwsaar.carpool.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -55,7 +51,6 @@ public class RideController {
                         .x(destLng)
                         .y(destLat)
                         .build())
-                .seats(seats)
                 .departureDateTime(departureDateTime)
                 .radius(radius)
                 .build();

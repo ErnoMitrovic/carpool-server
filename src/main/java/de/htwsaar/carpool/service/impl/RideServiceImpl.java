@@ -96,7 +96,6 @@ public class RideServiceImpl implements RideService {
                 startLocation,
                 endLocation,
                 getRidesRequest.radius(),
-                getRidesRequest.seats(),
                 Instant.parse(getRidesRequest.departureDateTime())
         ).stream().map(this::buildRideResponse).toList();
 
@@ -160,7 +159,6 @@ public class RideServiceImpl implements RideService {
     @Transactional
     public ResponseEntity<RideResponse> updateRide(Long rideId, UpdateRideRequest updateRideRequest, Long driverId)
             throws RideNotFoundException {
-        // TODO: Implement authorization check and obtain driver id from security context
         Ride ride = rideRepository.findById(rideId).orElseThrow(
                 () -> new RideNotFoundException("Ride not found"));
 
