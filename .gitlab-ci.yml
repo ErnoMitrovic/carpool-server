@@ -1,10 +1,14 @@
 services:
   - name: docker:dind
     command: [ "--tls=false" ]
+
 variables:
-  DOCKER_HOST: "tcp://docker:2375"
-  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: "tcp://docker:2375"  # Use the correct Docker host
+  DOCKER_TLS_CERTDIR: ""  # Disable TLS for Docker-in-Docker
   DOCKER_DRIVER: overlay2
+  TESTCONTAINERS_RYUK_DISABLED: "true"  # 🚀 Disables Ryuk to prevent connection issues
+  TESTCONTAINERS_CHECKS_DISABLE: "true"  # 🚀 Speeds up Testcontainers startup
+  TESTCONTAINERS_HOST_OVERRIDE: "tcp://localhost:2375"  # Ensures correct Docker networking
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
     -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
@@ -16,10 +20,13 @@ variables:
     --fail-at-end
     --show-version
     --no-transfer-progress
+
 image: maven:3-eclipse-temurin-17
+
 cache:
   paths:
     - .m2/repository
+
 test:
   stage: test
   script:
