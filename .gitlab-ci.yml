@@ -7,6 +7,10 @@ stages:
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository" # Cache dependencies
   CACHE_DIR: ".m2/repository" # Define cache directory
+  DOCKER_HOST: "unix:///var/run/docker.sock"  # Use host's Docker daemon
+  TESTCONTAINERS_RYUK_DISABLED: "true"  # Avoid permission issues with Ryuk
+  TESTCONTAINERS_CHECKS_DISABLE: "true"  # Speed up Testcontainers startup
+  TESTCONTAINERS_HOST_OVERRIDE: "tcp://localhost:2375"  # Ensure proper Testcontainers networking
 
 cache:
   key: ${CI_COMMIT_REF_SLUG} # Cache per branch
