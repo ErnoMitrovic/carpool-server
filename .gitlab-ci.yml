@@ -1,26 +1,23 @@
-image: maven:3.9.5-eclipse-temurin-17  # Use Maven with JDK 17
+image: docker:20.10.16
 
 services:
   - docker:dind
+
+variables:
+  DOCKER_HOST: "tcp://docker:2375"
+  DOCKER_TLS_CERTDIR: ""
+  TESTCONTAINERS_RYUK_DISABLED: "true"
+  TESTCONTAINERS_CHECKS_DISABLE: "true"
 
 stages:
   - build
   - test
 
-variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository" # Cache dependencies
-  CACHE_DIR: ".m2/repository" # Define cache directory
-
-cache:
-  key: ${CI_COMMIT_REF_SLUG} # Cache per branch
-  paths:
-    - ${CACHE_DIR}
-
 before_script:
-  - echo "Using Java version:"
-  - java -version
-  - echo "Using Maven version:"
-  - mvn -version
+  - apk add --no-cache openjdk17 maven  # Install JDK and Maven
+  - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+  - chmod +x mvnw
+  - docker info  # Check if Docker is running
 
 build:
   tags:
@@ -30,7 +27,7 @@ build:
     - mvn clean compile
   artifacts:
     paths:
-      - target/  # Save compiled code
+      - target/
 
 test:
   stage: test
@@ -40,6 +37,6 @@ test:
     - mvn test
   artifacts:
     reports:
-      junit: target/surefire-reports/TEST-*.xml # Store JUnit test results
+      junit: target/surefire-reports/TEST-*.xml
     paths:
-      - target/site/jacoco/ # Save JaCoCo coverage reports (optional)
+      - target/site/jacoco/
