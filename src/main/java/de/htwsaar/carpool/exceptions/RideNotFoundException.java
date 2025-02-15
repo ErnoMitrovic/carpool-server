@@ -1,6 +1,6 @@
 package de.htwsaar.carpool.exceptions;
 
-public class RideNotFoundException extends Exception {
+public class RideNotFoundException extends RuntimeException {
     public RideNotFoundException() {
         this("Rides not found");
     }

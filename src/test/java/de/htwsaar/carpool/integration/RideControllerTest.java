@@ -1,11 +1,11 @@
 package de.htwsaar.carpool.integration;
 
+import com.redis.testcontainers.RedisContainer;
 import de.htwsaar.carpool.config.TestSecurityConfig;
 import de.htwsaar.carpool.domain.ride.RideResponse;
 import de.htwsaar.carpool.model.*;
 import de.htwsaar.carpool.repository.*;
 import de.htwsaar.carpool.service.JwtService;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,11 +20,12 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.util.UriComponentsBuilder;
-import redis.embedded.RedisServer;
+import org.testcontainers.containers.GenericContainer;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -40,6 +41,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         classes = TestSecurityConfig.class)
 @ActiveProfiles(value = "test")
 public class RideControllerTest {
+
+    static final GenericContainer<?> redis = new RedisContainer("redis:6.2.6")
+            .withExposedPorts(6379)
+            .withReuse(true);
+
+    static {
+        redis.start();
+    }
+
+    @BeforeAll
+    static void enableConfig(@Autowired DataSource dataSource) throws SQLException {
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.execute("CREATE ALIAS IF NOT EXISTS H2GIS_SPATIAL FOR \"org.h2gis.functions.factory.H2GISFunctions.load\";");
+            stmt.execute("CALL H2GIS_SPATIAL();");
+        }
+    }
+
+    @DynamicPropertySource
+    static void configureRedis(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
+    }
 
     @LocalServerPort
     private int port;
@@ -73,30 +97,6 @@ public class RideControllerTest {
 
     private String getBaseUrl() {
         return String.format("http://localhost:%d/api/%s", port, apiVersion);
-    }
-
-    private static RedisServer embeddedRedis;
-
-    @BeforeAll
-    static void enableEmbeddedRedis() throws IOException {
-        embeddedRedis = RedisServer.newRedisServer().build();
-        embeddedRedis.start();
-    }
-
-    @AfterAll
-    static void stopEmbeddedRedis() throws IOException {
-        if (embeddedRedis != null) {
-            embeddedRedis.stop();
-        }
-    }
-
-    @BeforeAll
-    static void enableH2GIS(@Autowired DataSource dataSource) throws SQLException{
-        try (Connection conn = dataSource.getConnection();
-             Statement stmt = conn.createStatement()) {
-            stmt.execute("CREATE ALIAS IF NOT EXISTS H2GIS_SPATIAL FOR \"org.h2gis.functions.factory.H2GISFunctions.load\";");
-            stmt.execute("CALL H2GIS_SPATIAL();");
-        }
     }
 
     @BeforeEach
