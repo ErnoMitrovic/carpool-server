@@ -12,6 +12,7 @@ import de.htwsaar.carpool.repository.BookingStatusRepository;
 import de.htwsaar.carpool.repository.RideRepository;
 import de.htwsaar.carpool.repository.UserRepository;
 import de.htwsaar.carpool.service.BookingService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public ResponseEntity<CreateBookingResponse> createBooking(Long userId, Long rideId) {
         Ride ride = rideRepository.findById(rideId).orElseThrow(RideNotFoundException::new);
 
@@ -40,10 +42,10 @@ public class BookingServiceImpl implements BookingService {
             throw new BookedException(userId, rideId);
         }
 
+        CarpoolUser user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+
         BookingStatus bookingStatus = bookingStatusRepository.findByName(BookingStatusValue.ACCEPTED.name())
                 .orElseThrow(() -> new StatusNotFound(BookingStatusValue.ACCEPTED));
-
-        CarpoolUser user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
         Booking booking = Booking.builder()
                 .carpoolUser(user)
