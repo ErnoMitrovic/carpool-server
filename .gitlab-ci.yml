@@ -1,18 +1,15 @@
-image: maven:3.9.5-eclipse-temurin-17  # Use a Maven image with JDK 17
+image: maven:3.9.5-eclipse-temurin-17  # Use Maven with JDK 17
 
-services:
-  - docker:dind  # Enable Docker-in-Docker for Testcontainers
+stages:
+  - build
+  - test
 
 variables:
-  DOCKER_HOST: "tcp://docker:2375"  # Allow Testcontainers to communicate with Docker
-  DOCKER_TLS_CERTDIR: ""  # Disable TLS (needed for DinD)
-  TESTCONTAINERS_RYUK_DISABLED: "true"  # Avoid Ryuk permission issues
-  TESTCONTAINERS_CHECKS_DISABLE: "true"  # Speed up Testcontainers startup
-  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"  # Cache Maven dependencies
-  CACHE_DIR: ".m2/repository"  # Define cache directory
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository" # Cache dependencies
+  CACHE_DIR: ".m2/repository" # Define cache directory
 
 cache:
-  key: ${CI_COMMIT_REF_SLUG}  # Cache per branch
+  key: ${CI_COMMIT_REF_SLUG} # Cache per branch
   paths:
     - ${CACHE_DIR}
 
@@ -21,15 +18,8 @@ before_script:
   - java -version
   - echo "Using Maven version:"
   - mvn -version
-  - docker info  # Check if Docker is running
-
-stages:
-  - build
-  - test
 
 build:
-  tags:
-    - testing
   stage: build
   script:
     - mvn clean compile
@@ -39,12 +29,10 @@ build:
 
 test:
   stage: test
-  tags:
-    - testing
   script:
-    - mvn test -Dorg.testcontainers.DEBUG=true  # Enable Testcontainers debug logs
+    - mvn test
   artifacts:
     reports:
-      junit: target/surefire-reports/TEST-*.xml  # Store JUnit test results
+      junit: target/surefire-reports/TEST-*.xml # Store JUnit test results
     paths:
-      - target/site/jacoco/  # Save JaCoCo coverage reports (optional)
+      - target/site/jacoco/ # Save JaCoCo coverage reports (optional)
