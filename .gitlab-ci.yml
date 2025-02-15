@@ -1,12 +1,6 @@
-image: maven:3.9.5-eclipse-temurin-17  # Use Maven with JDK 17
-
-stages:
-  - build
-  - test
-
 services:
   - name: docker:dind
-    command: ["--tls=false"]
+    command: [ "--tls=false" ]
 variables:
   DOCKER_HOST: "tcp://docker:2375"
   DOCKER_TLS_CERTDIR: ""
@@ -22,32 +16,11 @@ variables:
     --fail-at-end
     --show-version
     --no-transfer-progress
-
+image: maven:3-eclipse-temurin-17
 cache:
-  key: ${CI_COMMIT_REF_SLUG} # Cache per branch
   paths:
-    - ${CACHE_DIR}
-
-before_script:
-  - echo "Using Java version:"
-  - java -version
-  - echo "Using Maven version:"
-  - mvn -version
-
-build:
-  stage: build
-  script:
-    - mvn clean compile
-  artifacts:
-    paths:
-      - target/  # Save compiled code
-
+    - .m2/repository
 test:
   stage: test
   script:
     - 'mvn $MAVEN_CLI_OPTS verify'
-  artifacts:
-    reports:
-      junit: target/surefire-reports/TEST-*.xml # Store JUnit test results
-    paths:
-      - target/site/jacoco/ # Save JaCoCo coverage reports (optional)
