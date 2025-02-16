@@ -29,7 +29,7 @@ class CarpoolApplicationTests {
     static void configureRedis(DynamicPropertyRegistry registry) {
         registry.add("spring.data.redis.host", () -> {
             log.info("Redis host: {}", redis.getHost());
-            if (redis.getHost().startsWith("[tcp://")) {
+            if (redis.getHost().startsWith("tcp://")) {
                 return "host.docker.internal";
             }
             return redis.getHost();
