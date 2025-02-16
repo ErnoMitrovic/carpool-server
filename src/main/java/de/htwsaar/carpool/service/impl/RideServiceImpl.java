@@ -16,6 +16,7 @@ import de.htwsaar.carpool.repository.UserRepository;
 import de.htwsaar.carpool.service.RideService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -33,6 +34,7 @@ import static de.htwsaar.carpool.config.Constants.SRID;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class RideServiceImpl implements RideService {
 
     private final RideRepository rideRepository;
@@ -43,16 +45,6 @@ public class RideServiceImpl implements RideService {
     private final GeometryFactory geometryFactory = new GeometryFactory(
             new PrecisionModel(), SRID
     );
-
-    public RideServiceImpl(RideRepository rideRepository,
-                           LocationRepository locationRepository,
-                           UserRepository userRepository,
-                           RideStatusRepository rideStatusRepository) {
-        this.rideRepository = rideRepository;
-        this.locationRepository = locationRepository;
-        this.userRepository = userRepository;
-        this.rideStatusRepository = rideStatusRepository;
-    }
 
     private RideResponse buildRideResponse(Ride ride) {
         Point startPoint = ride.getStart().getPosition();
@@ -88,8 +80,8 @@ public class RideServiceImpl implements RideService {
         );
 
         Point endLocation = geometryFactory.createPoint(
-                new Coordinate(getRidesRequest.startLocation().x(),
-                        getRidesRequest.startLocation().y())
+                new Coordinate(getRidesRequest.endLocation().x(),
+                        getRidesRequest.endLocation().y())
         );
 
         List<RideResponse> rides = rideRepository.findAvailableRides(

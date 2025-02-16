@@ -36,8 +36,7 @@ public class RideController {
             @RequestParam Double destLat,
             @RequestParam Double destLng,
             @RequestParam(required = false, defaultValue = "10") double radius,
-            @RequestParam String departureDateTime,
-            @RequestParam Integer seats
+            @RequestParam String departureDateTime
     ) throws RideNotFoundException {
         GetRidesRequest getRidesRequest = GetRidesRequest
                 .builder()

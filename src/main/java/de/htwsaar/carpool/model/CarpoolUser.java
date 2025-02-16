@@ -43,9 +43,10 @@ public class CarpoolUser {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Size(max = 15)
     @NotNull
-    @Column(name = "phone", nullable = false)
-    private Integer phone;
+    @Column(name = "phone", nullable = false, length = 15)
+    private String phone;
 
     @NotNull
     @Column(name = "university_id", nullable = false)

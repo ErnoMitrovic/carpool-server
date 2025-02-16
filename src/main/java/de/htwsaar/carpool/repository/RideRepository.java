@@ -29,7 +29,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
                             JOIN Location l_end ON r.end = l_end
                             WHERE r.availableSeats >= 1
                             AND DISTANCE(l_end.position, :destination) <= :radius
-                            AND DISTANCE(l_start.position, :destination) <= :radius
+                            AND DISTANCE(l_start.position, :userLocation) <= :radius
                             AND r.departureDatetime >= :departureDatetime
                             AND r.rideStatus.name = "AVAILABLE"
                             ORDER BY DISTANCE(l_start.position, :userLocation) ASC, r.departureDatetime ASC
