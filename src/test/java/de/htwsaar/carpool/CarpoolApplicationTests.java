@@ -1,35 +1,43 @@
 package de.htwsaar.carpool;
 
+import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import redis.embedded.RedisServer;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 
-import java.io.IOException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
 class CarpoolApplicationTests {
 
-	private static RedisServer embeddedRedis;
+    static final GenericContainer<?> redis = new RedisContainer("redis:6.2.6")
+            .withExposedPorts(6379)
+            .withReuse(true);
 
-	@BeforeAll
-	static void startEmbeddedRedis() throws IOException {
-		embeddedRedis = RedisServer.newRedisServer().build();
-		embeddedRedis.start();
-	}
+    static {
+        redis.start();
+    }
 
-	@AfterAll
-	static void stopEmbeddedRedis() throws IOException {
-		if (embeddedRedis != null) {
-			embeddedRedis.stop();
-		}
-	}
+    @DynamicPropertySource
+    static void configureRedis(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.host", () ->
+                redis.getHost().startsWith("tcp://") ? "host.docker.internal" : redis.getHost());
+        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
+    }
 
-	@Test
-	void contextLoads() {
-	}
+    @AfterAll
+    static void stopRedis() {
+        redis.stop();
+    }
+
+    @Test
+    void containerIsRunning() {
+        assertThat(redis.isRunning()).isTrue();
+    }
 
 }

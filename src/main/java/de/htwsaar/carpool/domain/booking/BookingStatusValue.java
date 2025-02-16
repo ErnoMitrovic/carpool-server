@@ -1,6 +1,6 @@
 package de.htwsaar.carpool.domain.booking;
 
-public enum BookingStatus {
+public enum BookingStatusValue {
     PENDING,
     ACCEPTED,
     REJECTED,

@@ -57,6 +57,6 @@ public interface RideService {
      * @throws UnauthorizedDriverException UnauthorizedDriverException if driver is not authorized
      */
     @Transactional
-    ResponseEntity<Void> cancelRide(Long rideId, Long driverId) // TODO: Get rider ID from token
+    ResponseEntity<Void> cancelRide(Long rideId, Long driverId)
             throws RideNotFoundException, UnauthorizedDriverException;
 }

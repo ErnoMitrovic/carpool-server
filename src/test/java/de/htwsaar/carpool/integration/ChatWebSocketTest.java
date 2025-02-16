@@ -2,12 +2,11 @@ package de.htwsaar.carpool.integration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redis.testcontainers.RedisContainer;
 import de.htwsaar.carpool.domain.message.MessageStatus;
 import de.htwsaar.carpool.domain.message.RecordedMessage;
 import de.htwsaar.carpool.domain.message.WebSocketPayload;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RList;
@@ -17,10 +16,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import redis.embedded.RedisServer;
+import org.testcontainers.containers.GenericContainer;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ChatWebSocketTest {
 
     private static final String WS_URI = "ws://localhost:%d/chat?senderId=testUser1&receiverId=testUser2";
-    private static RedisServer embeddedRedis;
     private final List<String> receivedMessages = new CopyOnWriteArrayList<>();
 
     @LocalServerPort
@@ -49,17 +49,19 @@ public class ChatWebSocketTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @BeforeAll
-    static void startEmbeddedRedis() throws IOException {
-        embeddedRedis = RedisServer.newRedisServer().build();
-        embeddedRedis.start();
+    static final GenericContainer<?> redis = new RedisContainer("redis:6.2.6")
+            .withExposedPorts(6379)
+            .withReuse(true);
+
+    static {
+        redis.start();
     }
 
-    @AfterAll
-    static void stopEmbeddedRedis() throws IOException {
-        if (embeddedRedis != null) {
-            embeddedRedis.stop();
-        }
+    @DynamicPropertySource
+    static void configureRedis(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.host", () ->
+                redis.getHost().startsWith("tcp://") ? "host.docker.internal" : redis.getHost());
+        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
     }
 
     @BeforeEach

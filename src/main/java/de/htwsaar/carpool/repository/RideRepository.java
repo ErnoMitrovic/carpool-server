@@ -20,7 +20,6 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
      * @param userLocation      the current user location
      * @param destination       the destination point
      * @param radius            Radius in which the start and end locations should be in km
-     * @param requiredSeats     Number of required seats
      * @param departureDatetime Departure datetime
      * @return List of available rides
      */
@@ -28,9 +27,9 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
                             SELECT r FROM Ride r
                             JOIN Location l_start ON r.start = l_start
                             JOIN Location l_end ON r.end = l_end
-                            WHERE r.availableSeats >= :requiredSeats
+                            WHERE r.availableSeats >= 1
                             AND DISTANCE(l_end.position, :destination) <= :radius
-                            AND DISTANCE(l_start.position, :destination) <= :radius
+                            AND DISTANCE(l_start.position, :userLocation) <= :radius
                             AND r.departureDatetime >= :departureDatetime
                             AND r.rideStatus.name = "AVAILABLE"
                             ORDER BY DISTANCE(l_start.position, :userLocation) ASC, r.departureDatetime ASC
@@ -39,6 +38,5 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
             @Param("userLocation") Point userLocation,
             @Param("destination") Point destination,
             @Param("radius") double radius,
-            @Param("requiredSeats") int requiredSeats,
             @Param("departureDatetime") Instant departureDatetime);
 }
