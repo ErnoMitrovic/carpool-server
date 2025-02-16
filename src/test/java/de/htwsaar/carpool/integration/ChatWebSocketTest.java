@@ -59,7 +59,8 @@ public class ChatWebSocketTest {
 
     @DynamicPropertySource
     static void configureRedis(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", () -> "localhost");
+        registry.add("spring.data.redis.host", () ->
+                redis.getHost().startsWith("tcp://") ? "host.docker.internal" : redis.getHost());
         registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
     }
 
