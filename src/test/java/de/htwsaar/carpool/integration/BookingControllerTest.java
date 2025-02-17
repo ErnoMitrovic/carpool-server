@@ -2,7 +2,6 @@ package de.htwsaar.carpool.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
-import de.htwsaar.carpool.domain.booking.CreateBookingRequest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,50 +57,42 @@ public class BookingControllerTest {
 
     @Test
     void createBooking_ShouldReturn201_WhenValid() throws Exception {
-        String url = "/api/" + apiVersion + "/booking";
-        // Arrange: Create a valid booking request
-        String requestBody = objectMapper.writeValueAsString(new CreateBookingRequest(3L));
+        String url = "/api/" + apiVersion + "/ride/3/booking";
 
         // Act & Assert: Send POST request to API
         mockMvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists());
     }
 
     @Test
     void createBooking_ShouldReturn404_WhenRideNotFound() throws Exception {
-        String url = "/api/" + apiVersion + "/booking";
-        String requestBody = objectMapper.writeValueAsString(new CreateBookingRequest(9999L)); // Non-existent ride ID
+        String url = "/api/" + apiVersion + "/ride/9999/booking";
 
         mockMvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isNotFound());
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Rides not found"));
     }
 
     @Test
     void createBooking_ShouldReturn400_WhenSeatsUnavailable() throws Exception {
         // Simulating a ride with no available seats
-        String url = "/api/" + apiVersion + "/booking";
-        String requestBody = objectMapper.writeValueAsString(new CreateBookingRequest(4L));
+        String url = "/api/" + apiVersion + "/ride/4/booking";
 
         mockMvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void createBooking_ShouldReturn409_WhenUserAlreadyBooked() throws Exception {
-        String url = "/api/" + apiVersion + "/booking";
+        String url = "/api/" + apiVersion + "/ride/1/booking";
         // Assuming user already booked this ride
-        String requestBody = objectMapper.writeValueAsString(new CreateBookingRequest(1L));
 
         mockMvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
     }
 }

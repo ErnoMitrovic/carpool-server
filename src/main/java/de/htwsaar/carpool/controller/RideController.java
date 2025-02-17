@@ -11,6 +11,7 @@ import de.htwsaar.carpool.exceptions.UnauthorizedDriverException;
 import de.htwsaar.carpool.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +20,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/${api.version}/ride")
+@RequiredArgsConstructor
 public class RideController {
     private final RideService rideService;
-
-    public RideController(RideService rideService) {
-        this.rideService = rideService;
-    }
 
     // As a user, I want to search for available carpool rides based on my destination, date, and time
     // so that I can find suitable travel options.
