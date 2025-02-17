@@ -1,10 +1,12 @@
 package de.htwsaar.carpool.exceptions;
 
-public class BookedException extends IllegalStateException {
+import org.springframework.http.HttpStatus;
+
+public class BookedException extends CarpoolException {
     public BookedException(Long userId, Long rideId) {
         this("The user with id " + userId + " already has a booking for ride " + rideId);
     }
     public BookedException(String message) {
-        super(message);
+        super(message, HttpStatus.CONFLICT);
     }
 }

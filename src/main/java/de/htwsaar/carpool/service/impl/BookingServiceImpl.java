@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.service.impl;
 
+import de.htwsaar.carpool.domain.booking.BookingResponse;
 import de.htwsaar.carpool.domain.booking.BookingStatusValue;
 import de.htwsaar.carpool.domain.booking.CreateBookingResponse;
 import de.htwsaar.carpool.exceptions.*;
@@ -62,5 +63,20 @@ public class BookingServiceImpl implements BookingService {
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingResponse);
+    }
+
+    @Override
+    public ResponseEntity<BookingResponse> getBookings(Long userId, Long rideId) {
+        Booking booking = bookingRepository.findBookingByRideAndCarpoolUserId(rideRepository.findById(rideId).orElseThrow(RideNotFoundException::new), userId)
+                .orElseThrow(() -> new BookingNotFoundException(userId, rideId));
+
+        return ResponseEntity.ok(BookingResponse.builder()
+                .bookingId(booking.getId())
+                .rideId(booking.getRide().getId())
+                .username(booking.getCarpoolUser().getEmail())
+                .userRole(booking.getCarpoolUser().getRole().getName())
+                .bookingStatus(booking.getBookingStatus().getName())
+                .rideStatus(booking.getRide().getRideStatus().getName())
+                .build());
     }
 }

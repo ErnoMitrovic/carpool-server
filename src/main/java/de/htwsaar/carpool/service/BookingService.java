@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.service;
 
+import de.htwsaar.carpool.domain.booking.BookingResponse;
 import de.htwsaar.carpool.domain.booking.CreateBookingResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
@@ -15,4 +16,12 @@ public interface BookingService {
      */
     @Transactional
     ResponseEntity<CreateBookingResponse> createBooking(Long userId, Long rideId);
+
+    /**
+     * The standard service to get the bookings based on the rideId
+     * @param userId the user that made the booking
+     * @param rideId the ride referenced
+     * @return a response with the booking details
+     */
+    ResponseEntity<BookingResponse> getBookings(Long userId, Long rideId);
 }

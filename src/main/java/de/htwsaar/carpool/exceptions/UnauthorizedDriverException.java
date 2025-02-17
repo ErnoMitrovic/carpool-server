@@ -1,8 +1,10 @@
 package de.htwsaar.carpool.exceptions;
 
-public class UnauthorizedDriverException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class UnauthorizedDriverException extends CarpoolException {
     public UnauthorizedDriverException(String message) {
-        super(message);
+        super(message, HttpStatus.UNAUTHORIZED);
     }
 }
 

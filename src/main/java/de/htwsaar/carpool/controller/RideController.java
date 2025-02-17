@@ -5,7 +5,6 @@ import de.htwsaar.carpool.domain.ride.CreateRideRequest;
 import de.htwsaar.carpool.domain.ride.GetRidesRequest;
 import de.htwsaar.carpool.domain.ride.RideResponse;
 import de.htwsaar.carpool.domain.ride.UpdateRideRequest;
-import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
 import de.htwsaar.carpool.exceptions.UnauthorizedDriverException;
 import de.htwsaar.carpool.service.RideService;
@@ -35,7 +34,7 @@ public class RideController {
             @RequestParam Double destLng,
             @RequestParam(required = false, defaultValue = "10") double radius,
             @RequestParam String departureDateTime
-    ) throws RideNotFoundException {
+    ) {
         GetRidesRequest getRidesRequest = GetRidesRequest
                 .builder()
                 .startLocation(PointDTO
@@ -58,8 +57,7 @@ public class RideController {
     // and pick-up points so that other users can find and join my ride.
     @Operation(summary = "Create a carpool ride")
     @PostMapping("/")
-    public ResponseEntity<RideResponse> createRide(@Valid @RequestBody CreateRideRequest createRideRequest, Principal principal)
-            throws DriverNotFoundException {
+    public ResponseEntity<RideResponse> createRide(@Valid @RequestBody CreateRideRequest createRideRequest, Principal principal) {
         return rideService.createRide(createRideRequest, Long.valueOf(principal.getName()));
     }
 

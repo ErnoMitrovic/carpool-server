@@ -1,7 +1,9 @@
 package de.htwsaar.carpool.exceptions;
 
-public class EmailExistsException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class EmailExistsException extends CarpoolException {
     public EmailExistsException(String message) {
-        super(message);
+        super(message, HttpStatus.CONFLICT);
     }
 }
