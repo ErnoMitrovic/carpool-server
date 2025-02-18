@@ -1,8 +1,11 @@
 package de.htwsaar.carpool.service;
 
 import de.htwsaar.carpool.domain.booking.BookingResponse;
+import de.htwsaar.carpool.domain.booking.BookingStatusValue;
 import de.htwsaar.carpool.domain.booking.CreateBookingResponse;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +24,9 @@ public interface BookingService {
      * The standard service to get the bookings based on the rideId
      * @param userId the user that made the booking
      * @param rideId the ride referenced
+     * @param statusValue the status of the booking
+     * @param pageRequest the page request for the pagination
      * @return a response with the booking details
      */
-    ResponseEntity<BookingResponse> getBookings(Long userId, Long rideId);
+    ResponseEntity<Page<BookingResponse>> getBookings(Long userId, Long rideId, BookingStatusValue statusValue, Pageable pageRequest);
 }

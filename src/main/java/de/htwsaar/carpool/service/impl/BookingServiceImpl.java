@@ -15,6 +15,8 @@ import de.htwsaar.carpool.repository.UserRepository;
 import de.htwsaar.carpool.service.BookingService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -66,17 +68,27 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public ResponseEntity<BookingResponse> getBookings(Long userId, Long rideId) {
-        Booking booking = bookingRepository.findBookingByRideAndCarpoolUserId(rideRepository.findById(rideId).orElseThrow(RideNotFoundException::new), userId)
-                .orElseThrow(() -> new BookingNotFoundException(userId, rideId));
+    public ResponseEntity<Page<BookingResponse>> getBookings(Long userId,
+                                                             Long rideId,
+                                                             BookingStatusValue statusValue,
+                                                             Pageable pageable) {
 
-        return ResponseEntity.ok(BookingResponse.builder()
-                .bookingId(booking.getId())
-                .rideId(booking.getRide().getId())
-                .username(booking.getCarpoolUser().getEmail())
-                .userRole(booking.getCarpoolUser().getRole().getName())
-                .bookingStatus(booking.getBookingStatus().getName())
-                .rideStatus(booking.getRide().getRideStatus().getName())
-                .build());
+        Page<Booking> bookings = bookingRepository.findAllByRideIdAndCarpoolUserIdAndBookingStatusName(
+                rideId,
+                userId,
+                statusValue.name(),
+                pageable);
+
+        Page<BookingResponse> responsePage = bookings.map(booking ->
+                BookingResponse.builder()
+                        .bookingId(booking.getId())
+                        .rideId(booking.getRide().getId())
+                        .username(booking.getCarpoolUser().getEmail())
+                        .userRole(booking.getCarpoolUser().getRole().getName())
+                        .bookingStatus(booking.getBookingStatus().getName())
+                        .rideStatus(booking.getRide().getRideStatus().getName())
+                        .build());
+
+        return ResponseEntity.ok(responsePage);
     }
 }

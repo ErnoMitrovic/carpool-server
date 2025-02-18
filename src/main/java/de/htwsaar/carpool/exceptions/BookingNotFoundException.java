@@ -7,6 +7,10 @@ public class BookingNotFoundException extends CarpoolException {
         this("Booking not found for user " + userId + " and ride " + rideId);
     }
 
+    public BookingNotFoundException(Long rideId) {
+        this("Bookings not found for ride " + rideId);
+    }
+
     public BookingNotFoundException(String message) {
         super(message, HttpStatus.NOT_FOUND);
     }
