@@ -2,11 +2,9 @@ package de.htwsaar.carpool.unit;
 
 import de.htwsaar.carpool.domain.booking.BookingStatusValue;
 import de.htwsaar.carpool.domain.booking.CreateBookingResponse;
+import de.htwsaar.carpool.domain.ride.RideStatusValue;
 import de.htwsaar.carpool.exceptions.*;
-import de.htwsaar.carpool.model.Booking;
-import de.htwsaar.carpool.model.BookingStatus;
-import de.htwsaar.carpool.model.CarpoolUser;
-import de.htwsaar.carpool.model.Ride;
+import de.htwsaar.carpool.model.*;
 import de.htwsaar.carpool.repository.BookingRepository;
 import de.htwsaar.carpool.repository.BookingStatusRepository;
 import de.htwsaar.carpool.repository.RideRepository;
@@ -18,8 +16,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -49,18 +52,34 @@ class BookingServiceTest {
     private Ride testRide;
     private CarpoolUser testUser;
     private BookingStatus testStatus;
+    private Booking testBooking;
 
     @BeforeEach
     void setUp() {
+        RideStatus rideStatus = new RideStatus();
+        rideStatus.setName(RideStatusValue.AVAILABLE.name());
         testRide = new Ride();
         testRide.setId(1L);
         testRide.setAvailableSeats(3);
+        testRide.setRideStatus(rideStatus);
 
         testUser = new CarpoolUser();
         testUser.setId(1L);
+        UserRole userRole = new UserRole();
+        userRole.setName("USER");
+        testUser.setRole(userRole);
 
         testStatus = new BookingStatus();
         testStatus.setName(BookingStatusValue.ACCEPTED.name());
+
+        BookingStatus testPending = new BookingStatus();
+        testPending.setName(BookingStatusValue.PENDING.name());
+
+        testBooking = new Booking();
+        testBooking.setId(101L);
+        testBooking.setRide(testRide);
+        testBooking.setCarpoolUser(testUser);
+        testBooking.setBookingStatus(testPending);
     }
 
     @Test
@@ -125,5 +144,46 @@ class BookingServiceTest {
         when(bookingStatusRepository.findByName(BookingStatusValue.ACCEPTED.name())).thenReturn(Optional.empty());
 
         assertThrows(StatusNotFound.class, () -> bookingService.createBooking(1L, 1L));
+    }
+
+    @Test
+    void getBookings_ReturnsPaginatedBookings() {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Booking> bookingPage = new PageImpl<>(List.of(testBooking), pageable, 1);
+
+        when(bookingRepository.findAllByRideIdAndCarpoolUserIdAndBookingStatusName(1L, 2L, "PENDING", pageable))
+                .thenReturn(bookingPage);
+
+        var response = bookingService.getBookings(2L, 1L, BookingStatusValue.PENDING, pageable);
+
+        assertNotNull(response);
+        assertEquals(1, Objects.requireNonNull(response.getBody()).getTotalElements());
+        assertEquals(101L, response.getBody().getContent().get(0).bookingId());
+    }
+
+    @Test
+    void getBookings_ReturnsEmptyPage_WhenNoBookingsFound() {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Booking> emptyPage = Page.empty(pageable);
+
+        when(bookingRepository.findAllByRideIdAndCarpoolUserIdAndBookingStatusName(1L, 2L, "PENDING", pageable))
+                .thenReturn(emptyPage);
+
+        var response = bookingService.getBookings(2L, 1L, BookingStatusValue.PENDING, pageable);
+
+        assertNotNull(response);
+        assertEquals(0, Objects.requireNonNull(response.getBody()).getTotalElements());
+    }
+
+    @Test
+    void getBookings_ThrowsException_WhenRideNotFound() {
+        Pageable pageable = PageRequest.of(0, 5);
+
+        when(bookingRepository.findAllByRideIdAndCarpoolUserIdAndBookingStatusName(999L, 2L, "PENDING", pageable))
+                .thenThrow(new RideNotFoundException());
+
+        assertThrows(RideNotFoundException.class, () ->
+                bookingService.getBookings(2L, 999L, BookingStatusValue.PENDING, pageable)
+        );
     }
 }
