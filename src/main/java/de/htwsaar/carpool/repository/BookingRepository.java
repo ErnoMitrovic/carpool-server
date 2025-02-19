@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -17,7 +17,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      * @param userId the user's id
      * @return an optional of booking
      */
-    Optional<Booking> findBookingByRideAndCarpoolUserId(Ride ride, Long userId);
+    List<Booking> findBookingByRideAndCarpoolUserId(Ride ride, Long userId);
 
     /**
      * Used to get all the bookings of a ride

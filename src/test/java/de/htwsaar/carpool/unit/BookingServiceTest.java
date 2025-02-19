@@ -88,7 +88,7 @@ class BookingServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(bookingStatusRepository.findByName(BookingStatusValue.ACCEPTED.name()))
                 .thenReturn(Optional.of(testStatus));
-        when(bookingRepository.findBookingByRideAndCarpoolUserId(testRide, 1L)).thenReturn(Optional.empty());
+        when(bookingRepository.findBookingByRideAndCarpoolUserId(testRide, 1L)).thenReturn(List.of());
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
             Booking savedBooking = invocation.getArgument(0);
             savedBooking.setId(10L);
@@ -122,7 +122,7 @@ class BookingServiceTest {
     void createBooking_ShouldThrowBookedException_WhenUserAlreadyBooked() {
         when(rideRepository.findById(1L)).thenReturn(Optional.of(testRide));
         when(bookingRepository.findBookingByRideAndCarpoolUserId(testRide, 1L))
-                .thenReturn(Optional.of(new Booking()));
+                .thenReturn(List.of(new Booking()));
 
         assertThrows(BookedException.class, () -> bookingService.createBooking(1L, 1L));
     }
@@ -130,7 +130,7 @@ class BookingServiceTest {
     @Test
     void createBooking_ShouldThrowUserNotFoundException_WhenUserDoesNotExist() {
         when(rideRepository.findById(1L)).thenReturn(Optional.of(testRide));
-        when(bookingRepository.findBookingByRideAndCarpoolUserId(testRide, 1L)).thenReturn(Optional.empty());
+        when(bookingRepository.findBookingByRideAndCarpoolUserId(testRide, 1L)).thenReturn(List.of());
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> bookingService.createBooking(1L, 1L));
@@ -140,7 +140,7 @@ class BookingServiceTest {
     void createBooking_ShouldThrowStatusNotFound_WhenBookingStatusNotFound() {
         when(rideRepository.findById(1L)).thenReturn(Optional.of(testRide));
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(bookingRepository.findBookingByRideAndCarpoolUserId(testRide, 1L)).thenReturn(Optional.empty());
+        when(bookingRepository.findBookingByRideAndCarpoolUserId(testRide, 1L)).thenReturn(List.of());
         when(bookingStatusRepository.findByName(BookingStatusValue.ACCEPTED.name())).thenReturn(Optional.empty());
 
         assertThrows(StatusNotFound.class, () -> bookingService.createBooking(1L, 1L));

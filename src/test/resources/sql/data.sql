@@ -37,7 +37,11 @@ VALUES
 -- Insert bookings
 INSERT INTO booking (created_at, ride_id, user_id, booking_status_id)
 VALUES
-    (CURRENT_TIMESTAMP, 1, 1, 2),
+    (CURRENT_TIMESTAMP, 1, 1, 1),
+    (CURRENT_TIMESTAMP, 2, 1, 1),
+    (CURRENT_TIMESTAMP, 1, 1, 1),
+    (CURRENT_TIMESTAMP, 2, 1, 1),
+    (CURRENT_TIMESTAMP, 1, 1, 1),
     (CURRENT_TIMESTAMP, 2, 1, 1);
 
 -- Insert messages

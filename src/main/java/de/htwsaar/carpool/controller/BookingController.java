@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -28,6 +29,7 @@ public class BookingController {
 
     @Operation(summary = "Returns the bookings according to the ride id")
     @GetMapping
+    @PreAuthorize("hasAuthority('DRIVER')")
     public ResponseEntity<Page<BookingResponse>> getBookings(@RequestParam BookingStatusValue statusValue,
                                                              Principal principal,
                                                              @PathVariable Long rideId,

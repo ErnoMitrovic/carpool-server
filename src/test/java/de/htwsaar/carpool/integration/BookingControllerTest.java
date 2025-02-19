@@ -1,7 +1,7 @@
 package de.htwsaar.carpool.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
+import de.htwsaar.carpool.domain.booking.BookingStatusValue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +17,10 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.containers.GenericContainer;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,16 +30,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @Transactional
 @ActiveProfiles("test")
-@WithMockUser(username = "1", authorities = "USER", password = "raw")
+@WithMockUser(username = "1", authorities = "USER")
 public class BookingControllerTest {
     @Value("${api.version}")
     private String apiVersion;
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper; // Used for JSON serialization
 
     static final GenericContainer<?> redis = new RedisContainer("redis:6.2.6")
             .withExposedPorts(6379)
@@ -55,9 +54,13 @@ public class BookingControllerTest {
         registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
     }
 
+    private String getBaseUrl(int rideId) {
+        return String.format("http://localhost:8080/api/%s/ride/%d/booking", apiVersion, rideId);
+    }
+
     @Test
     void createBooking_ShouldReturn201_WhenValid() throws Exception {
-        String url = "/api/" + apiVersion + "/ride/3/booking";
+        String url = getBaseUrl(3);
 
         // Act & Assert: Send POST request to API
         mockMvc.perform(post(url)
@@ -68,7 +71,7 @@ public class BookingControllerTest {
 
     @Test
     void createBooking_ShouldReturn404_WhenRideNotFound() throws Exception {
-        String url = "/api/" + apiVersion + "/ride/9999/booking";
+        String url = getBaseUrl(9999);
 
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -79,7 +82,7 @@ public class BookingControllerTest {
     @Test
     void createBooking_ShouldReturn400_WhenSeatsUnavailable() throws Exception {
         // Simulating a ride with no available seats
-        String url = "/api/" + apiVersion + "/ride/4/booking";
+        String url = getBaseUrl(4);
 
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -88,11 +91,25 @@ public class BookingControllerTest {
 
     @Test
     void createBooking_ShouldReturn409_WhenUserAlreadyBooked() throws Exception {
-        String url = "/api/" + apiVersion + "/ride/1/booking";
+        String url = getBaseUrl(1);
         // Assuming user already booked this ride
 
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithMockUser(username = "1", authorities = "DRIVER")
+    void getBookings_ShouldReturn200_WhenValid() throws Exception {
+        String url = UriComponentsBuilder.fromHttpUrl(getBaseUrl(1))
+                .queryParam("statusValue", BookingStatusValue.PENDING)
+                .encode().toUriString();
+
+        mockMvc.perform(get(url)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.content[0].bookingId").value(1));
     }
 }
