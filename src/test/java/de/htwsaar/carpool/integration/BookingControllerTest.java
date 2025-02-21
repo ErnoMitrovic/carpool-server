@@ -20,8 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.containers.GenericContainer;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,6 +36,10 @@ public class BookingControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    private final Long DRIVER_ID = 2L;
+    private final Long RIDE_ID = 1L;
+    private final Long BOOKING_ID = 1L;
 
     static final GenericContainer<?> redis = new RedisContainer("redis:6.2.6")
             .withExposedPorts(6379)
@@ -54,7 +57,7 @@ public class BookingControllerTest {
         registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
     }
 
-    private String getBaseUrl(int rideId) {
+    private String getBaseUrl(long rideId) {
         return String.format("http://localhost:8080/api/%s/ride/%d/booking", apiVersion, rideId);
     }
 
@@ -111,5 +114,62 @@ public class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(3))
                 .andExpect(jsonPath("$.content[0].bookingId").value(1));
+    }
+
+
+    @Test
+    @WithMockUser(username = "2", authorities = "DRIVER")
+    void updateBookingStatus_AcceptBooking_Returns200() throws Exception {
+        mockMvc.perform(patch(getBaseUrl(RIDE_ID) + "/{bookingId}", BOOKING_ID)
+                        .param("status", BookingStatusValue.ACCEPTED.name())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bookingStatus").value("ACCEPTED"))
+                .andExpect(jsonPath("$.rideId").value(RIDE_ID))
+                .andExpect(jsonPath("$.bookingId").value(BOOKING_ID));
+    }
+
+    @Test
+    @WithMockUser(username = "2", authorities = "DRIVER")
+    void updateBookingStatus_RejectBooking_Returns200() throws Exception {
+        mockMvc.perform(patch(getBaseUrl(RIDE_ID) + "/{bookingId}", BOOKING_ID)
+                        .param("status", BookingStatusValue.REJECTED.name())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bookingStatus").value("REJECTED"))
+                .andExpect(jsonPath("$.rideId").value(RIDE_ID))
+                .andExpect(jsonPath("$.bookingId").value(BOOKING_ID));
+    }
+
+    @Test
+    @WithMockUser(username = "3", authorities = "DRIVER")
+    void updateBookingStatus_FailWhenUnauthorizedDriver_Returns403() throws Exception {
+
+        mockMvc.perform(patch(getBaseUrl(RIDE_ID) + "/{bookingId}", BOOKING_ID)
+                        .param("status", BookingStatusValue.ACCEPTED.name())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "2", authorities = "DRIVER")
+    void updateBookingStatus_FailWhenRideIsFull_Returns400() throws Exception {
+        // Ride with 0 seats available (London Trip)
+        long FULL_RIDE_ID = 4L;
+        mockMvc.perform(patch(getBaseUrl(FULL_RIDE_ID) + "/{bookingId}", BOOKING_ID)
+                        .param("status", BookingStatusValue.ACCEPTED.name())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "2", authorities = "DRIVER")
+    void updateBookingStatus_FailWhenBookingNotFound_Returns404() throws Exception {
+        Long nonExistentBookingId = 999L;
+
+        mockMvc.perform(patch(getBaseUrl(RIDE_ID) + "/{bookingId}", nonExistentBookingId)
+                        .param("status", BookingStatusValue.ACCEPTED.name())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }
