@@ -29,4 +29,14 @@ public interface BookingService {
      * @return a response with the booking details
      */
     ResponseEntity<Page<BookingResponse>> getBookings(Long userId, Long rideId, BookingStatusValue statusValue, Pageable pageRequest);
+
+    /**
+     * The standard service to update the booking status
+     * @param driverId the driver that is updating the status
+     * @param rideId the ride referenced
+     * @param bookingId the booking referenced
+     * @param status the status to update to
+     * @return a response with the updated booking details
+     */
+    ResponseEntity<BookingResponse> updateBookingStatus(Long driverId, Long rideId, Long bookingId, BookingStatusValue status);
 }

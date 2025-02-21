@@ -41,4 +41,14 @@ public class BookingController {
                 statusValue,
                 PageRequest.of(page, size));
     }
+
+    @PatchMapping("/{bookingId}")
+    public ResponseEntity<BookingResponse> updateBookingStatus(
+            Principal principal,
+            @PathVariable Long rideId,
+            @PathVariable Long bookingId,
+            @RequestParam BookingStatusValue status) {
+
+        return bookingService.updateBookingStatus(Long.valueOf(principal.getName()), rideId, bookingId, status);
+    }
 }
