@@ -4,9 +4,6 @@ import de.htwsaar.carpool.domain.ride.CreateRideRequest;
 import de.htwsaar.carpool.domain.ride.GetRidesRequest;
 import de.htwsaar.carpool.domain.ride.RideResponse;
 import de.htwsaar.carpool.domain.ride.UpdateRideRequest;
-import de.htwsaar.carpool.exceptions.DriverNotFoundException;
-import de.htwsaar.carpool.exceptions.RideNotFoundException;
-import de.htwsaar.carpool.exceptions.UnauthorizedDriverException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -20,21 +17,17 @@ public interface RideService {
      * As a user, I want to search for available carpool rides based on my destination, date, and time
      * @param getRidesRequest GetRidesRequest DTO
      * @return ResponseEntity<List<RideResponse>> List of RideResponse
-     * @throws RideNotFoundException RideNotFoundException if no rides are found
      */
-    ResponseEntity<List<RideResponse>> getFilteredRides(GetRidesRequest getRidesRequest)
-            throws RideNotFoundException;
+    ResponseEntity<List<RideResponse>> getFilteredRides(GetRidesRequest getRidesRequest);
 
     /**
      * As a driver, I want to create a carpool ride with details like departure time, destination, available seats,
      * @param createRideRequest CreateRideRequest DTO
      * @param driverId the driver that owns this ride
      * @return ResponseEntity<RideResponse> RideResponse DTO
-     * @throws DriverNotFoundException DriverNotFoundException if driver is not found
      */
     @Transactional
-    ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest, Long driverId)
-            throws DriverNotFoundException;
+    ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest, Long driverId);
 
     /**
      * As a driver, I want to update the details of a carpool ride that I have created.
@@ -43,20 +36,15 @@ public interface RideService {
      * @param updateRideRequest UpdateRideRequest DTO
      * @param driverId the driver that owns this ride
      * @return ResponseEntity<RideResponse> RideResponse DTO
-     * @throws RideNotFoundException RideNotFoundException if ride is not found
      */
     @Transactional
-    ResponseEntity<RideResponse> updateRide(Long rideId, @Valid UpdateRideRequest updateRideRequest, Long driverId)
-            throws RideNotFoundException, UnauthorizedDriverException;
+    ResponseEntity<RideResponse> updateRide(Long rideId, @Valid UpdateRideRequest updateRideRequest, Long driverId);
 
     /**
      * As a driver, I want to cancel (delete) a carpool ride that I have created.
      * @param rideId Ride ID
      * @return ResponseEntity<Long> Ride ID
-     * @throws RideNotFoundException RideNotFoundException if ride is not found
-     * @throws UnauthorizedDriverException UnauthorizedDriverException if driver is not authorized
      */
     @Transactional
-    ResponseEntity<Void> cancelRide(Long rideId, Long driverId)
-            throws RideNotFoundException, UnauthorizedDriverException;
+    ResponseEntity<Void> cancelRide(Long rideId, Long driverId);
 }

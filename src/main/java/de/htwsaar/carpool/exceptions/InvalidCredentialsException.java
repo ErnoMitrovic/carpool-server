@@ -1,11 +1,13 @@
 package de.htwsaar.carpool.exceptions;
 
-public class InvalidCredentialsException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class InvalidCredentialsException extends CarpoolException {
     public InvalidCredentialsException() {
         this("Invalid email or password");
     }
 
     public InvalidCredentialsException(String message) {
-        super(message);
+        super(message, HttpStatus.UNAUTHORIZED);
     }
 }

@@ -43,6 +43,9 @@ test:
   stage: test
   script:
     - 'mvn $MAVEN_CLI_OPTS verify'
+  only:
+    - main
+    - merge_requests
 
 deploy:
   stage: deploy

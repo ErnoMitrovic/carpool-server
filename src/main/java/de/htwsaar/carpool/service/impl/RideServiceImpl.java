@@ -124,7 +124,7 @@ public class RideServiceImpl implements RideService {
         Location end = getOrInsertLocation(endLocation);
 
         // Get available status id
-        de.htwsaar.carpool.model.RideStatus rideStatus = rideStatusRepository.findByName(RideStatus.AVAILABLE.name())
+        de.htwsaar.carpool.model.RideStatus rideStatus = rideStatusRepository.findByName(RideStatusValue.AVAILABLE.name())
                 .orElseThrow(() -> new RuntimeException("Ride status not found"));
 
         // Create a new ride
@@ -209,7 +209,7 @@ public class RideServiceImpl implements RideService {
             throw new UnauthorizedDriverException("Driver is not authorized to cancel this ride");
         }
 
-        ride.setRideStatus(rideStatusRepository.findByName(RideStatus.CANCELLED.name())
+        ride.setRideStatus(rideStatusRepository.findByName(RideStatusValue.CANCELLED.name())
                 .orElseThrow(() -> new StatusNotFound("Ride status not found")));
 
         rideRepository.save(ride);

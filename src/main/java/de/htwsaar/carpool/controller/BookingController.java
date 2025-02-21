@@ -1,30 +1,54 @@
 package de.htwsaar.carpool.controller;
 
-import de.htwsaar.carpool.domain.booking.CreateBookingRequest;
+import de.htwsaar.carpool.domain.booking.BookingResponse;
+import de.htwsaar.carpool.domain.booking.BookingStatusValue;
 import de.htwsaar.carpool.domain.booking.CreateBookingResponse;
 import de.htwsaar.carpool.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/${api.version}/booking")
+@RequestMapping("/api/${api.version}/ride/{rideId}/booking")
 public class BookingController {
     private final BookingService bookingService;
 
     @Operation(summary = "Creates a booking according to the ride id")
     @PostMapping
     public ResponseEntity<CreateBookingResponse> createBooking(
-            @Valid @RequestBody CreateBookingRequest bookingRequest,
-            Principal principal) {
-        return bookingService.createBooking(Long.valueOf(principal.getName()), bookingRequest.rideId());
+            Principal principal, @PathVariable Long rideId) {
+        return bookingService.createBooking(Long.valueOf(principal.getName()), rideId);
+    }
+
+    @Operation(summary = "Returns the bookings according to the ride id")
+    @GetMapping
+    @PreAuthorize("hasAuthority('DRIVER')")
+    public ResponseEntity<Page<BookingResponse>> getBookings(@RequestParam BookingStatusValue statusValue,
+                                                             Principal principal,
+                                                             @PathVariable Long rideId,
+                                                             @RequestParam(defaultValue = "0") Integer page,
+                                                             @RequestParam(defaultValue = "10") Integer size) {
+        return bookingService.getBookings(
+                Long.valueOf(principal.getName()),
+                rideId,
+                statusValue,
+                PageRequest.of(page, size));
+    }
+
+    @PatchMapping("/{bookingId}")
+    public ResponseEntity<BookingResponse> updateBookingStatus(
+            Principal principal,
+            @PathVariable Long rideId,
+            @PathVariable Long bookingId,
+            @RequestParam BookingStatusValue status) {
+
+        return bookingService.updateBookingStatus(Long.valueOf(principal.getName()), rideId, bookingId, status);
     }
 }
