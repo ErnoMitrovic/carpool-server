@@ -39,4 +39,13 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
             @Param("destination") Point destination,
             @Param("radius") double radius,
             @Param("departureDatetime") Instant departureDatetime);
+
+    /**
+     * The method finds available rides that match the given criteria.
+     *
+     * @param rideId   the ride id
+     * @param driverId the driver id
+     * @return true if the ride exists
+     */
+    boolean existsByIdAndDriverId(Long rideId, Long driverId);
 }
