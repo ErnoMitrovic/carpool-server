@@ -27,7 +27,7 @@ public interface RideService {
      * @return ResponseEntity<RideResponse> RideResponse DTO
      */
     @Transactional
-    ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest, Long driverId);
+    ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest, String driverId);
 
     /**
      * As a driver, I want to update the details of a carpool ride that I have created.
@@ -38,7 +38,7 @@ public interface RideService {
      * @return ResponseEntity<RideResponse> RideResponse DTO
      */
     @Transactional
-    ResponseEntity<RideResponse> updateRide(Long rideId, @Valid UpdateRideRequest updateRideRequest, Long driverId);
+    ResponseEntity<RideResponse> updateRide(Long rideId, @Valid UpdateRideRequest updateRideRequest, String driverId);
 
     /**
      * As a driver, I want to cancel (delete) a carpool ride that I have created.
@@ -46,5 +46,5 @@ public interface RideService {
      * @return ResponseEntity<Long> Ride ID
      */
     @Transactional
-    ResponseEntity<Void> cancelRide(Long rideId, Long driverId);
+    ResponseEntity<Void> cancelRide(Long rideId, String driverId);
 }

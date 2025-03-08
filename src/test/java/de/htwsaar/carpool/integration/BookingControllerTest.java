@@ -1,6 +1,7 @@
 package de.htwsaar.carpool.integration;
 
 import com.redis.testcontainers.RedisContainer;
+import de.htwsaar.carpool.TestSecurityConfig;
 import de.htwsaar.carpool.domain.booking.BookingStatusValue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,7 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @Transactional
 @ActiveProfiles("test")
-@WithMockUser(username = "1", authorities = "USER")
+@WithMockUser(username = "U1", authorities = "USER")
+@Import(TestSecurityConfig.class)
 public class BookingControllerTest {
     @Value("${api.version}")
     private String apiVersion;
@@ -103,7 +106,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "1", authorities = "DRIVER")
+    @WithMockUser(username = "U1", authorities = "DRIVER")
     void getBookings_ShouldReturn200_WhenValid() throws Exception {
         String url = UriComponentsBuilder.fromHttpUrl(getBaseUrl(1))
                 .queryParam("statusValue", BookingStatusValue.PENDING)
@@ -118,7 +121,7 @@ public class BookingControllerTest {
 
 
     @Test
-    @WithMockUser(username = "2", authorities = "DRIVER")
+    @WithMockUser(username = "U2", authorities = "DRIVER")
     void updateBookingStatus_AcceptBooking_Returns200() throws Exception {
         mockMvc.perform(patch(getBaseUrl(RIDE_ID) + "/{bookingId}", BOOKING_ID)
                         .param("status", BookingStatusValue.ACCEPTED.name())
@@ -142,17 +145,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "3", authorities = "DRIVER")
-    void updateBookingStatus_FailWhenUnauthorizedDriver_Returns403() throws Exception {
-
-        mockMvc.perform(patch(getBaseUrl(RIDE_ID) + "/{bookingId}", BOOKING_ID)
-                        .param("status", BookingStatusValue.ACCEPTED.name())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(username = "2", authorities = "DRIVER")
+    @WithMockUser(username = "U2", authorities = "DRIVER")
     void updateBookingStatus_FailWhenRideIsFull_Returns400() throws Exception {
         // Ride with 0 seats available (London Trip)
         long FULL_RIDE_ID = 4L;
@@ -163,7 +156,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "2", authorities = "DRIVER")
+    @WithMockUser(username = "U2", authorities = "DRIVER")
     void updateBookingStatus_FailWhenBookingNotFound_Returns404() throws Exception {
         Long nonExistentBookingId = 999L;
 

@@ -1,73 +1,41 @@
 package de.htwsaar.carpool.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "carpool_user", uniqueConstraints = {
-        @UniqueConstraint(name = "user_ak_1", columnNames = {"email"}),
-        @UniqueConstraint(name = "user_ak_2", columnNames = {"phone"})
-})
-@SQLDelete(sql = "UPDATE carpool_user SET is_active = false WHERE id=?")
-@SQLRestriction("is_active=true")
-@SequenceGenerator(name = "carpool_user_id_seq", sequenceName = "carpool_user_id_seq", allocationSize = 1)
+@Table(name = "carpool_user", schema = "public")
 public class CarpoolUser {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "carpool_user_id_seq")
-    @Column(name = "id", nullable = false)
-    private Long id;
+    @Size(max = 128)
+    @Column(name = "id", nullable = false, length = 128)
+    private String id;
 
     @Size(max = 50)
     @NotNull
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Email
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "email", nullable = false, length = 50)
-    private String email;
-
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "password", nullable = false)
-    private String password;
-
-    @Size(max = 15)
-    @NotNull
-    @Column(name = "phone", nullable = false, length = 15)
-    private String phone;
-
-    @NotNull
-    @Column(name = "university_id", nullable = false)
+    @Column(name = "university_id")
     private Long universityId;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "role_id", nullable = false)
-    private UserRole role;
-
-    @CreationTimestamp
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
     private Instant createdAt;
 
-    @UpdateTimestamp
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
     private Instant updatedAt;
-
-    @NotNull
-    @ColumnDefault("true")
-    @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
 
 }

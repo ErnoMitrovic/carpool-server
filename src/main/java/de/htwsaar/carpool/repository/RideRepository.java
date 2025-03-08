@@ -47,5 +47,5 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
      * @param driverId the driver id
      * @return true if the ride exists
      */
-    boolean existsByIdAndDriverId(Long rideId, Long driverId);
+    boolean existsByIdAndDriverId(Long rideId, String driverId);
 }

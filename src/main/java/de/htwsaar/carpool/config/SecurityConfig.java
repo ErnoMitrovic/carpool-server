@@ -1,26 +1,45 @@
 package de.htwsaar.carpool.config;
 
-import de.htwsaar.carpool.exceptions.InvalidCredentialsException;
-import de.htwsaar.carpool.model.CarpoolUser;
-import de.htwsaar.carpool.repository.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.io.IOException;
 
 @Configuration
 public class SecurityConfig {
 
+    /**
+     * Firebase Auth bean
+     * @return Firebase Auth instance
+     * @throws IOException If the credentials are invalid
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, UserDetailsService userDetailsService, JwtAuthFilter jwtAuthFilter) throws Exception {
+    public FirebaseAuth firebaseAuth() throws IOException {
+        if(FirebaseApp.getApps().isEmpty()) {
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.getApplicationDefault())
+                    .build();
+            FirebaseApp firebaseApp = FirebaseApp.initializeApp(options);
+            return FirebaseAuth.getInstance(firebaseApp);
+        }
+
+        return FirebaseAuth.getInstance();
+    }
+
+    @Bean
+    @Profile("!test")
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(
                         AbstractHttpConfigurer::disable
@@ -34,18 +53,7 @@ public class SecurityConfig {
                                 //      "/v3/api-docs/**").hasRole("DEVELOPER")
                                 .anyRequest().authenticated()
                 )
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setContentType("application/json");
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.getWriter().write("{\"error\": \"Unauthorized - " + authException.getMessage() + "\"}");
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            throw accessDeniedException;
-                        })
-                )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .userDetailsService(userDetailsService);
+                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));
         return http.build();
     }
 
@@ -65,19 +73,5 @@ public class SecurityConfig {
     @Profile({"dev", "test"})
     public PasswordEncoder devPasswordEncoder() {
         return new BCryptPasswordEncoder(4);
-    }
-
-    @Profile({"dev", "prod"})
-    @Bean
-    public UserDetailsService userDetailsService(UserRepository repository) {
-        return email -> {
-            CarpoolUser carpoolUser = repository.findByEmail(email).orElseThrow(InvalidCredentialsException::new);
-            return User.withUsername(String.valueOf(carpoolUser.getId()))
-                    .authorities(carpoolUser.getRole().getName())
-                    .accountExpired(!carpoolUser.getIsActive())
-                    .credentialsExpired(!carpoolUser.getIsActive())
-                    .disabled(!carpoolUser.getIsActive())
-                    .accountLocked(!carpoolUser.getIsActive()).build();
-        };
     }
 }

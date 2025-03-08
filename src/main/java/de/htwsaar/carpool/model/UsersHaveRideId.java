@@ -18,7 +18,7 @@ public class UsersHaveRideId implements java.io.Serializable {
     private static final long serialVersionUID = -5571980444741560409L;
     @NotNull
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private String userId;
 
     @NotNull
     @Column(name = "ride_id", nullable = false)

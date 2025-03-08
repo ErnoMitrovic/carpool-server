@@ -58,7 +58,7 @@ public class RideController {
     @Operation(summary = "Create a carpool ride")
     @PostMapping("/")
     public ResponseEntity<RideResponse> createRide(@Valid @RequestBody CreateRideRequest createRideRequest, Principal principal) {
-        return rideService.createRide(createRideRequest, Long.valueOf(principal.getName()));
+        return rideService.createRide(createRideRequest, principal.getName());
     }
 
     @Operation(summary = "Update a carpool ride")
@@ -67,13 +67,13 @@ public class RideController {
                                                    @Valid @RequestBody UpdateRideRequest updateRideRequest,
                                                    Principal principal)
             throws RideNotFoundException {
-        return rideService.updateRide(rideId, updateRideRequest, Long.valueOf(principal.getName()));
+        return rideService.updateRide(rideId, updateRideRequest, principal.getName());
     }
 
     @Operation(summary = "Delete a carpool ride by updating its status to cancelled")
     @DeleteMapping("/{rideId}/")
     public ResponseEntity<Void> cancelRide(@PathVariable Long rideId, Principal driverId)
             throws RideNotFoundException, UnauthorizedDriverException {
-        return rideService.cancelRide(rideId, Long.valueOf(driverId.getName()));
+        return rideService.cancelRide(rideId, driverId.getName());
     }
 }

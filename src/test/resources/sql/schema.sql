@@ -5,24 +5,12 @@ CALL H2GIS_SPATIAL();
 -- Enable foreign key constraints
 SET REFERENTIAL_INTEGRITY FALSE;
 
--- Creating tables
-CREATE TABLE carpool_role (
-                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                              name VARCHAR(50) NOT NULL UNIQUE
-);
-
 CREATE TABLE carpool_user (
-                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                              id VARCHAR(128) PRIMARY KEY,
                               name VARCHAR(50) NOT NULL,
-                              email VARCHAR(50) NOT NULL UNIQUE,
-                              phone VARCHAR(15) NOT NULL UNIQUE,
                               university_id BIGINT,
-                              role_id BIGINT NOT NULL,
                               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                              password VARCHAR(255) NOT NULL,
-                              is_active BOOLEAN DEFAULT TRUE,
-                              FOREIGN KEY (role_id) REFERENCES carpool_role(id) ON DELETE NO ACTION
+                              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE booking_status (
@@ -51,7 +39,7 @@ CREATE TABLE ride (
                       available_seats INT NOT NULL,
                       cost_per_seat REAL NOT NULL,
                       ride_description TEXT NOT NULL,
-                      driver_id BIGINT NOT NULL,
+                      driver_id VARCHAR(128) NOT NULL,
                       ride_status_id BIGINT NOT NULL,
                       start_id BIGINT NOT NULL,
                       end_id BIGINT NOT NULL,
@@ -65,7 +53,7 @@ CREATE TABLE booking (
                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
                          created_at TIMESTAMP NOT NULL,
                          ride_id BIGINT NOT NULL,
-                         user_id BIGINT NOT NULL,
+                         user_id VARCHAR(128) NOT NULL,
                          booking_status_id BIGINT NOT NULL,
                          FOREIGN KEY (ride_id) REFERENCES ride(id) ON DELETE NO ACTION,
                          FOREIGN KEY (user_id) REFERENCES carpool_user(id) ON DELETE NO ACTION,
@@ -76,8 +64,8 @@ CREATE TABLE message (
                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
                          timestamp TIMESTAMP NOT NULL,
                          content TEXT NOT NULL,
-                         sender_id BIGINT NOT NULL,
-                         receiver_id BIGINT NOT NULL,
+                         sender_id VARCHAR(128) NOT NULL,
+                         receiver_id VARCHAR(128) NOT NULL,
                          ride_id BIGINT NOT NULL,
                          message_status_id BIGINT NOT NULL,
                          FOREIGN KEY (sender_id) REFERENCES carpool_user(id) ON DELETE NO ACTION,
@@ -87,7 +75,7 @@ CREATE TABLE message (
 );
 
 CREATE TABLE users_have_rides (
-                                  user_id BIGINT NOT NULL,
+                                  user_id VARCHAR(128) NOT NULL,
                                   ride_id BIGINT NOT NULL,
                                   PRIMARY KEY (user_id, ride_id),
                                   FOREIGN KEY (user_id) REFERENCES carpool_user(id) ON DELETE NO ACTION,

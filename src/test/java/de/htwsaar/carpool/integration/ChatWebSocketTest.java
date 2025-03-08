@@ -3,6 +3,7 @@ package de.htwsaar.carpool.integration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
+import de.htwsaar.carpool.TestSecurityConfig;
 import de.htwsaar.carpool.domain.message.MessageStatus;
 import de.htwsaar.carpool.domain.message.RecordedMessage;
 import de.htwsaar.carpool.domain.message.WebSocketPayload;
@@ -14,6 +15,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -35,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Slf4j
+@Import(TestSecurityConfig.class)
 public class ChatWebSocketTest {
 
     private static final String WS_URI = "ws://localhost:%d/chat?senderId=testUser1&receiverId=testUser2";
@@ -126,7 +129,7 @@ public class ChatWebSocketTest {
 
         List<RecordedMessage> chatHistory = objectMapper.readValue(
                 receivedMessages.get(receivedMessages.size() - 1), // Take the last message
-                new TypeReference<List<RecordedMessage>>() {}
+                new TypeReference<>() {}
         );
 
         assertFalse(chatHistory.isEmpty());
