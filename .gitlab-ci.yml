@@ -32,6 +32,10 @@ cache:
   paths:
     - .m2/repository
 
+before_script:
+  - securefiles_download "carpool-app-creds.json"
+  - export GOOGLE_APPLICATION_CREDENTIALS="$CI_PROJECT_DIR/carpool-app-creds.json.json"
+
 build:
   stage: build
   script:
