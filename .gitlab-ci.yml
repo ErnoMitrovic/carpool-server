@@ -35,7 +35,7 @@ cache:
 
 before_script:
   - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
-  - export GOOGLE_APPLICATION_CREDENTIALS=".secure-files/carpool-app-creds.json"
+  - export GOOGLE_APPLICATION_CREDENTIALS=".secure_files/carpool-app-creds.json"
 
 build:
   stage: build
