@@ -32,6 +32,11 @@ cache:
   paths:
     - .m2/repository
 
+before_script:
+  - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
+  - ls -lah .secure_files
+  - export GOOGLE_APPLICATION_CREDENTIALS=".secure-files/carpool-app-creds.json"
+
 build:
   stage: build
   script:
