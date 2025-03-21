@@ -33,7 +33,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public ResponseEntity<CreateBookingResponse> createBooking(Long userId, Long rideId) {
+    public ResponseEntity<CreateBookingResponse> createBooking(String userId, Long rideId) {
         Ride ride = rideRepository.findById(rideId).orElseThrow(RideNotFoundException::new);
 
         if (ride.getAvailableSeats() <= 0) {
@@ -68,7 +68,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public ResponseEntity<Page<BookingResponse>> getBookings(Long userId,
+    public ResponseEntity<Page<BookingResponse>> getBookings(String userId,
                                                              Long rideId,
                                                              BookingStatusValue statusValue,
                                                              Pageable pageable) {
@@ -85,8 +85,8 @@ public class BookingServiceImpl implements BookingService {
                 BookingResponse.builder()
                         .bookingId(booking.getId())
                         .rideId(booking.getRide().getId())
-                        .username(booking.getCarpoolUser().getEmail())
-                        .userRole(booking.getCarpoolUser().getRole().getName())
+                        .username(booking.getCarpoolUser().getId())
+                        // .userRole(booking.getCarpoolUser().getRole().getName())
                         .bookingStatus(booking.getBookingStatus().getName())
                         .rideStatus(booking.getRide().getRideStatus().getName())
                         .build());
@@ -95,7 +95,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public ResponseEntity<BookingResponse> updateBookingStatus(Long driverId, Long rideId, Long bookingId, BookingStatusValue status) {
+    public ResponseEntity<BookingResponse> updateBookingStatus(String driverId, Long rideId, Long bookingId, BookingStatusValue status) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
@@ -103,10 +103,6 @@ public class BookingServiceImpl implements BookingService {
 
         if (!ride.getId().equals(rideId)) {
             throw new InvalidBookingException();
-        }
-
-        if (!ride.getDriver().getId().equals(driverId)) {
-            throw new UnauthorizedDriverException(driverId, rideId);
         }
 
         if (status == BookingStatusValue.ACCEPTED) {
@@ -126,7 +122,7 @@ public class BookingServiceImpl implements BookingService {
         BookingResponse response = BookingResponse.builder()
                 .bookingId(booking.getId())
                 .rideId(ride.getId())
-                .username(booking.getCarpoolUser().getEmail())
+                .username(booking.getCarpoolUser().getId())
                 .bookingStatus(booking.getBookingStatus().getName())
                 .rideStatus(ride.getRideStatus().getName())
                 .build();

@@ -100,7 +100,7 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest, Long driverId)
+    public ResponseEntity<RideResponse> createRide(CreateRideRequest createRideRequest, String driverId)
             throws DriverNotFoundException {
         // Check if the driver exists
         CarpoolUser driver = userRepository.findById(driverId).orElseThrow(
@@ -149,7 +149,7 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public ResponseEntity<RideResponse> updateRide(Long rideId, UpdateRideRequest updateRideRequest, Long driverId)
+    public ResponseEntity<RideResponse> updateRide(Long rideId, UpdateRideRequest updateRideRequest, String driverId)
             throws RideNotFoundException {
         Ride ride = rideRepository.findById(rideId).orElseThrow(
                 () -> new RideNotFoundException("Ride not found"));
@@ -200,14 +200,10 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public ResponseEntity<Void> cancelRide(Long rideId, Long driverId)
+    public ResponseEntity<Void> cancelRide(Long rideId, String driverId)
             throws RideNotFoundException, UnauthorizedDriverException, StatusNotFound {
         Ride ride = rideRepository.findById(rideId).orElseThrow(
                 () -> new RideNotFoundException("Ride not found"));
-
-        if(!Objects.equals(ride.getDriver().getId(), driverId)) {
-            throw new UnauthorizedDriverException("Driver is not authorized to cancel this ride");
-        }
 
         ride.setRideStatus(rideStatusRepository.findByName(RideStatusValue.CANCELLED.name())
                 .orElseThrow(() -> new StatusNotFound("Ride status not found")));

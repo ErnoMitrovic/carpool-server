@@ -11,14 +11,12 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final MessageStatusSeeder messageStatusSeeder;
     private final BookingStatusSeeder bookingStatusSeeder;
     private final RideStatusSeeder rideStatusSeeder;
-    private final UserRoleSeeder userRoleSeeder;
 
     @Override
     public void run(String... args) {
         messageStatusSeeder.seedMessageStatuses();
         bookingStatusSeeder.seedBookingStatuses();
         rideStatusSeeder.seedRideStatuses();
-        userRoleSeeder.seedUserRoles();
     }
 
 }

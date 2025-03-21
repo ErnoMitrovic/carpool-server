@@ -24,7 +24,7 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<CreateBookingResponse> createBooking(
             Principal principal, @PathVariable Long rideId) {
-        return bookingService.createBooking(Long.valueOf(principal.getName()), rideId);
+        return bookingService.createBooking(principal.getName(), rideId);
     }
 
     @Operation(summary = "Returns the bookings according to the ride id")
@@ -36,7 +36,7 @@ public class BookingController {
                                                              @RequestParam(defaultValue = "0") Integer page,
                                                              @RequestParam(defaultValue = "10") Integer size) {
         return bookingService.getBookings(
-                Long.valueOf(principal.getName()),
+                principal.getName(),
                 rideId,
                 statusValue,
                 PageRequest.of(page, size));
@@ -49,6 +49,6 @@ public class BookingController {
             @PathVariable Long bookingId,
             @RequestParam BookingStatusValue status) {
 
-        return bookingService.updateBookingStatus(Long.valueOf(principal.getName()), rideId, bookingId, status);
+        return bookingService.updateBookingStatus(principal.getName(), rideId, bookingId, status);
     }
 }

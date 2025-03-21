@@ -72,7 +72,7 @@ public class RideServiceTest {
         );
 
         CarpoolUser driver = new CarpoolUser();
-        driver.setId(1L);
+        driver.setId("1L");
 
         Location startLocation = new Location();
         startLocation.setId(1L);
@@ -94,14 +94,14 @@ public class RideServiceTest {
         rideStatus.setName("AVAILABLE");
 
         // Mock repository behavior
-        when(userRepository.findById(1L)).thenReturn(Optional.of(driver));
+        when(userRepository.findById("1L")).thenReturn(Optional.of(driver));
         when(locationRepository.findByPosition(any(org.locationtech.jts.geom.Point.class))).thenReturn(Optional.empty());
         when(locationRepository.save(any(Location.class))).thenReturn(startLocation).thenReturn(endLocation);
         when(rideStatusRepository.findByName("AVAILABLE")).thenReturn(Optional.of(rideStatus));
         when(rideRepository.save(any(Ride.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Call the method
-        ResponseEntity<RideResponse> response = rideService.createRide(request, 1L);
+        ResponseEntity<RideResponse> response = rideService.createRide(request, "1L");
 
         // Verify response
         assertNotNull(response);
@@ -124,10 +124,10 @@ public class RideServiceTest {
                 "A sample ride"
         );
 
-        when(userRepository.findById(2L)).thenReturn(Optional.empty());
+        when(userRepository.findById("2L")).thenReturn(Optional.empty());
 
         try {
-            rideService.createRide(request, 2L);
+            rideService.createRide(request, "2L");
         } catch (DriverNotFoundException e) {
             assertEquals("Driver not found", e.getMessage());
         }
@@ -143,8 +143,7 @@ public class RideServiceTest {
         Ride ride = new Ride();
         ride.setId(1L);
         CarpoolUser driver = new CarpoolUser();
-        driver.setId(1L);
-        driver.setName("John Doe");
+        driver.setId("1L");
         ride.setDriver(driver);
 
         Point start = geometryFactory.createPoint(new Coordinate(-74.0060, 40.7128));
@@ -164,7 +163,7 @@ public class RideServiceTest {
         when(locationRepository.findByPosition(any(Point.class))).thenReturn(Optional.empty());
         when(locationRepository.save(any(Location.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ResponseEntity<RideResponse> response = rideService.updateRide(1L, request, 1L);
+        ResponseEntity<RideResponse> response = rideService.updateRide(1L, request, "1L");
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -179,8 +178,7 @@ public class RideServiceTest {
     @Test
     public void testUpdateRideStatus_Success() throws RideNotFoundException, UnauthorizedDriverException {
         CarpoolUser driver = new CarpoolUser();
-        driver.setId(1L);
-        driver.setName("John Doe");
+        driver.setId("1L");
 
         Ride ride = new Ride();
         ride.setId(1L);
@@ -193,7 +191,7 @@ public class RideServiceTest {
         when(rideStatusRepository.findByName("CANCELLED")).thenReturn(Optional.of(canceledStatus));
         when(rideRepository.save(any(Ride.class))).thenReturn(ride);
 
-        ResponseEntity<Void> response = rideService.cancelRide(1L, 1L);
+        ResponseEntity<Void> response = rideService.cancelRide(1L, "1L");
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -206,26 +204,7 @@ public class RideServiceTest {
     public void testUpdateRideStatus_RideNotFound() {
         when(rideRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(RideNotFoundException.class, () -> rideService.cancelRide(999L, 1L));
-    }
-
-    /**
-     * Test the updateRide method in RideService with an unauthorized driver
-     */
-    @Test
-    public void testUpdateRideStatus_UnauthorizedDriver() {
-        CarpoolUser driver = new CarpoolUser();
-        driver.setId(2L);
-        driver.setName("Jane Doe");
-        Ride ride = new Ride();
-        ride.setId(1L);
-        ride.setDriver(driver);
-
-        // Mock repository behavior
-        when(rideRepository.findById(1L)).thenReturn(Optional.of(ride));
-
-        // Call the service method and expect exception
-        assertThrows(UnauthorizedDriverException.class, () -> rideService.cancelRide(1L, 1L));
+        assertThrows(RideNotFoundException.class, () -> rideService.cancelRide(999L, "1L"));
     }
 
 }

@@ -1,26 +1,52 @@
 package de.htwsaar.carpool.config;
 
-import de.htwsaar.carpool.exceptions.InvalidCredentialsException;
-import de.htwsaar.carpool.model.CarpoolUser;
-import de.htwsaar.carpool.repository.UserRepository;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
 
+    /**
+     * Firebase Auth bean
+     *
+     * @return Firebase Auth instance
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, UserDetailsService userDetailsService, JwtAuthFilter jwtAuthFilter) throws Exception {
+    public FirebaseAuth firebaseAuth() {
+        return FirebaseApp.getApps().isEmpty() ?
+                FirebaseAuth.getInstance(FirebaseApp.initializeApp()) :
+                FirebaseAuth.getInstance();
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return new CorsFilter(source);
+    }
+
+    @Bean
+    @Profile({"dev", "prod"})
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(
                         AbstractHttpConfigurer::disable
@@ -28,7 +54,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorizeRequests -> authorizeRequests
-                                .requestMatchers("/", "/chat/**", "/api/{version}/auth/**",
+                                .requestMatchers("/", "/index.html", "/chat/**", "/api/{version}/auth/**",
                                         "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 //.requestMatchers(
                                 //      "/v3/api-docs/**").hasRole("DEVELOPER")
@@ -44,40 +70,7 @@ public class SecurityConfig {
                             throw accessDeniedException;
                         })
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .userDetailsService(userDetailsService);
+                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));
         return http.build();
-    }
-
-    /**
-     * A good password encoder to use
-     * In production use 12> strength
-     *
-     * @return A password encoder
-     */
-    @Bean
-    @Profile("prod")
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
-    }
-
-    @Bean
-    @Profile({"dev", "test"})
-    public PasswordEncoder devPasswordEncoder() {
-        return new BCryptPasswordEncoder(4);
-    }
-
-    @Profile({"dev", "prod"})
-    @Bean
-    public UserDetailsService userDetailsService(UserRepository repository) {
-        return email -> {
-            CarpoolUser carpoolUser = repository.findByEmail(email).orElseThrow(InvalidCredentialsException::new);
-            return User.withUsername(String.valueOf(carpoolUser.getId()))
-                    .authorities(carpoolUser.getRole().getName())
-                    .accountExpired(!carpoolUser.getIsActive())
-                    .credentialsExpired(!carpoolUser.getIsActive())
-                    .disabled(!carpoolUser.getIsActive())
-                    .accountLocked(!carpoolUser.getIsActive()).build();
-        };
     }
 }

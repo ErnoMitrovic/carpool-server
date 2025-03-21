@@ -18,7 +18,7 @@ public interface BookingService {
      * @return a response with only the id
      */
     @Transactional
-    ResponseEntity<CreateBookingResponse> createBooking(Long userId, Long rideId);
+    ResponseEntity<CreateBookingResponse> createBooking(String userId, Long rideId);
 
     /**
      * The standard service to get the bookings based on the rideId
@@ -28,7 +28,7 @@ public interface BookingService {
      * @param pageRequest the page request for the pagination
      * @return a response with the booking details
      */
-    ResponseEntity<Page<BookingResponse>> getBookings(Long userId, Long rideId, BookingStatusValue statusValue, Pageable pageRequest);
+    ResponseEntity<Page<BookingResponse>> getBookings(String userId, Long rideId, BookingStatusValue statusValue, Pageable pageRequest);
 
     /**
      * The standard service to update the booking status
@@ -38,5 +38,5 @@ public interface BookingService {
      * @param status the status to update to
      * @return a response with the updated booking details
      */
-    ResponseEntity<BookingResponse> updateBookingStatus(Long driverId, Long rideId, Long bookingId, BookingStatusValue status);
+    ResponseEntity<BookingResponse> updateBookingStatus(String driverId, Long rideId, Long bookingId, BookingStatusValue status);
 }
