@@ -144,7 +144,6 @@ public class RideServiceTest {
         ride.setId(1L);
         CarpoolUser driver = new CarpoolUser();
         driver.setId("1L");
-        driver.setName("John Doe");
         ride.setDriver(driver);
 
         Point start = geometryFactory.createPoint(new Coordinate(-74.0060, 40.7128));
@@ -180,7 +179,6 @@ public class RideServiceTest {
     public void testUpdateRideStatus_Success() throws RideNotFoundException, UnauthorizedDriverException {
         CarpoolUser driver = new CarpoolUser();
         driver.setId("1L");
-        driver.setName("John Doe");
 
         Ride ride = new Ride();
         ride.setId(1L);

@@ -28,7 +28,7 @@ public class AuthController {
                     responseCode = "201"
             )
     })
-    @PostMapping("/driver/")
+    @PostMapping("/driver")
     public ResponseEntity<TokenResponse> registerDriver(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
         return userService.registerUser(registerUserRequest, UserRoleValue.DRIVER);
     }
@@ -39,7 +39,7 @@ public class AuthController {
                     responseCode = "201"
             )
     })
-    @PostMapping("/user/")
+    @PostMapping("/user")
     public ResponseEntity<TokenResponse> registerUser(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
         return userService.registerUser(registerUserRequest, UserRoleValue.USER);
     }
@@ -50,13 +50,13 @@ public class AuthController {
                     responseCode = "201"
             )
     })
-    @PostMapping("/admin/")
+    @PostMapping("/admin")
     public ResponseEntity<TokenResponse> registerAdmin(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
         return userService.registerUser(registerUserRequest, UserRoleValue.ADMIN);
     }
 
     @Operation(summary = "Get a json web token")
-    @PostMapping("/token/")
+    @PostMapping("/token")
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         return userService.loginUser(loginRequest.email(), loginRequest.password());
     }
