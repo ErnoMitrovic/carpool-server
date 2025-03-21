@@ -32,9 +32,11 @@ cache:
   paths:
     - .m2/repository
 
+
 before_script:
-  - securefiles_download "carpool-app-creds.json"
-  - export GOOGLE_APPLICATION_CREDENTIALS="$CI_PROJECT_DIR/carpool-app-creds.json.json"
+  - export SECURE_FILES_DOWNLOAD_PATH="$CI_PROJECT_DIR/.secure-files"
+  - powershell -Command "& { (Invoke-WebRequest -Uri https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer.ps1 -UseBasicParsing).Content | Invoke-Expression }"
+  - export GOOGLE_APPLICATION_CREDENTIALS="$CI_PROJECT_DIR/.secure-files/carpool-app-creds.json.json"
 
 build:
   stage: build
