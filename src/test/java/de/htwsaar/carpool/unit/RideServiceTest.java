@@ -1,8 +1,10 @@
 package de.htwsaar.carpool.unit;
 
+import de.htwsaar.carpool.domain.location.CreateLocationRequest;
 import de.htwsaar.carpool.domain.location.PointDTO;
 import de.htwsaar.carpool.domain.ride.CreateRideRequest;
 import de.htwsaar.carpool.domain.ride.RideResponse;
+import de.htwsaar.carpool.domain.ride.RideStatusValue;
 import de.htwsaar.carpool.domain.ride.UpdateRideRequest;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
 import de.htwsaar.carpool.exceptions.RideNotFoundException;
@@ -40,7 +42,7 @@ import static org.mockito.Mockito.when;
 public class RideServiceTest {
     private final static int SRID = 4326;
     private final static GeometryFactory geometryFactory = new GeometryFactory(
-        new PrecisionModel(), SRID
+            new PrecisionModel(), SRID
     );
 
     @Mock
@@ -57,6 +59,7 @@ public class RideServiceTest {
 
     /**
      * Test the createRide method in RideService
+     *
      * @throws DriverNotFoundException if driver is not found
      */
     @Test
@@ -66,8 +69,26 @@ public class RideServiceTest {
                 Instant.now().toString(),
                 3,
                 10.50f,
-                new PointDTO(-74.0060, 40.7128),
-                new PointDTO(-118.2437, 34.0522),
+                CreateLocationRequest.builder()
+                        .name("New York City")
+                        .address("New York City")
+                        .position(
+                                PointDTO.builder()
+                                        .x(-74.0060)
+                                        .y(40.7128)
+                                        .build()
+                        )
+                        .build(),
+                CreateLocationRequest.builder()
+                        .name("Los Angeles")
+                        .address("Los Angeles")
+                        .position(
+                                PointDTO.builder()
+                                        .x(-118.2437)
+                                        .y(34.0522)
+                                        .build()
+                        )
+                        .build(),
                 "A sample ride"
         );
 
@@ -119,8 +140,26 @@ public class RideServiceTest {
                 Instant.now().toString(),
                 3,
                 10.50f,
-                new PointDTO(-74.0060, 40.7128),
-                new PointDTO(-118.2437, 34.0522),
+                CreateLocationRequest.builder()
+                        .name("New York City")
+                        .address("New York City")
+                        .position(
+                                PointDTO.builder()
+                                        .x(-74.0060)
+                                        .y(40.7128)
+                                        .build()
+                        )
+                        .build(),
+                CreateLocationRequest.builder()
+                        .name("Los Angeles")
+                        .address("Los Angeles")
+                        .position(
+                                PointDTO.builder()
+                                        .x(-118.2437)
+                                        .y(34.0522)
+                                        .build()
+                        )
+                        .build(),
                 "A sample ride"
         );
 
@@ -135,27 +174,40 @@ public class RideServiceTest {
 
     /**
      * Test the updateRide method in RideService with a successful update
-     * @throws RideNotFoundException if ride is not found
+     *
+     * @throws RideNotFoundException       if ride is not found
      * @throws UnauthorizedDriverException if driver is not authorized
      */
     @Test
     public void testUpdateRide_Success() throws RideNotFoundException, UnauthorizedDriverException {
+        RideStatus rideStatus = new RideStatus();
+        rideStatus.setName(RideStatusValue.AVAILABLE.name());
+
         Ride ride = new Ride();
         ride.setId(1L);
         CarpoolUser driver = new CarpoolUser();
         driver.setId("1L");
         ride.setDriver(driver);
+        ride.setRideStatus(rideStatus);
 
         Point start = geometryFactory.createPoint(new Coordinate(-74.0060, 40.7128));
         Point end = geometryFactory.createPoint(new Coordinate(-118.2437, 34.0522));
 
         UpdateRideRequest request = new UpdateRideRequest(
-                 "2025-01-15T10:00:00Z",
+                "2025-01-15T10:00:00Z",
                 4,
                 15.0f,
                 "Updated description",
-                new PointDTO(start.getX(), end.getY()),
-                new PointDTO(end.getX(), end.getY())
+                CreateLocationRequest.builder()
+                        .name("New York City")
+                        .address("New York City")
+                        .position(new PointDTO(start.getX(), start.getY()))
+                        .build(),
+                CreateLocationRequest.builder()
+                        .name("Los Angeles")
+                        .address("Los Angeles")
+                        .position(new PointDTO(end.getX(), end.getY()))
+                        .build()
         );
 
         when(rideRepository.findById(1L)).thenReturn(Optional.of(ride));
@@ -172,7 +224,8 @@ public class RideServiceTest {
 
     /**
      * Test the updateRide method in RideService with a ride that is not found
-     * @throws RideNotFoundException if ride is not found
+     *
+     * @throws RideNotFoundException       if ride is not found
      * @throws UnauthorizedDriverException if driver is not authorized
      */
     @Test

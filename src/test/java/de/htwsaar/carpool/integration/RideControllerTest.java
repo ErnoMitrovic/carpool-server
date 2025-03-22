@@ -64,7 +64,7 @@ public class RideControllerTest {
                 .queryParam("destLat", 2.2943506)
                 .queryParam("destLng", 48.8588443)
                 .queryParam("radius", 50)
-                .queryParam("departureDateTime", "2025-02-20T08:00:00Z")
+                .queryParam("departureDatetime", "2025-02-20T08:00:00Z")
                 .encode().toUriString();
 
         mockMvc.perform(get(url).contentType("application/json"))

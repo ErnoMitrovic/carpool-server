@@ -2,6 +2,7 @@ package de.htwsaar.carpool.repository;
 
 import de.htwsaar.carpool.model.Ride;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,7 +20,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
      *
      * @param userLocation      the current user location
      * @param destination       the destination point
-     * @param radius            Radius in which the start and end locations should be in km
+     * @param radius            Radius in which the startLocation and endLocation locations should be in km
      * @param departureDatetime Departure datetime
      * @return List of available rides
      */
@@ -48,4 +49,12 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
      * @return true if the ride exists
      */
     boolean existsByIdAndDriverId(Long rideId, String driverId);
+
+    /**
+     * The method finds all rides created by the driver.
+     *
+     * @param driverId the driver id
+     * @return List of rides
+     */
+    List<Ride> findAllByDriverId(String driverId, Sort sort);
 }

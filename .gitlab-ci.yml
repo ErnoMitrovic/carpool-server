@@ -47,7 +47,6 @@ build:
 test:
   stage: test
   script:
-    - ls -lah .secure_files
     - 'mvn $MAVEN_CLI_OPTS verify'
   only:
     - main
