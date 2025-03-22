@@ -1,22 +1,30 @@
 package de.htwsaar.carpool.domain.ride;
 
-import de.htwsaar.carpool.domain.location.PointDTO;
+import de.htwsaar.carpool.domain.location.CreateLocationRequest;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import static de.htwsaar.carpool.config.Constants.DATE_TIME_FORMAT;
-import static de.htwsaar.carpool.config.Constants.DATE_TIME_REGEX;
-
+/**
+ * CreateRideRequest DTO
+ * @param departureDatetime the departure datetime of the ride
+ * @param availableSeats the number of available seats
+ * @param costPerSeat the cost per seat
+ * @param startLocation the startLocation location
+ * @param endLocation the endLocation location
+ * @param rideDescription the ride description
+ */
+@Builder
 public record CreateRideRequest(
-        @NotNull @Pattern(regexp = DATE_TIME_REGEX, message = "Datetime format should be " + DATE_TIME_FORMAT)
+        @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         String departureDatetime,
         @NotNull
         Integer availableSeats,
         @NotNull
         Float costPerSeat,
-        PointDTO startLocation,
+        CreateLocationRequest startLocation,
         @NotNull
-        PointDTO endLocation,
+        CreateLocationRequest endLocation,
         @NotNull
         String rideDescription
 ) {

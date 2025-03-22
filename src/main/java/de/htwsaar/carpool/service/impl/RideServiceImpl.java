@@ -1,5 +1,7 @@
 package de.htwsaar.carpool.service.impl;
 
+import de.htwsaar.carpool.domain.location.CreateLocationRequest;
+import de.htwsaar.carpool.domain.location.LocationResponse;
 import de.htwsaar.carpool.domain.location.PointDTO;
 import de.htwsaar.carpool.domain.ride.*;
 import de.htwsaar.carpool.exceptions.DriverNotFoundException;
@@ -22,6 +24,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -52,20 +55,39 @@ public class RideServiceImpl implements RideService {
         return new RideResponse(
                 ride.getId(),
                 ride.getDepartureDatetime().toString(),
-                PointDTO.builder().x(startPoint.getX()).y(startPoint.getY()).build(),
-                PointDTO.builder().x(endPoint.getX()).y(endPoint.getY()).build(),
+                LocationResponse.builder()
+                        .name(ride.getStart().getName())
+                        .address(ride.getStart().getAddress())
+                        .position(PointDTO.builder().x(startPoint.getX()).y(startPoint.getY()).build())
+                        .build(),
+                LocationResponse.builder()
+                        .name(ride.getEnd().getName())
+                        .address(ride.getEnd().getAddress())
+                        .position(PointDTO.builder().x(endPoint.getX()).y(endPoint.getY()).build())
+                        .build(),
                 ride.getAvailableSeats(),
-                ride.getCostPerSeat()
+                ride.getCostPerSeat(),
+                ride.getRideStatus().getName()
         );
     }
 
-    private Location getOrInsertLocation(Point position) {
+    private Point convertToPoint(PointDTO pointDTO) {
+        return geometryFactory.createPoint(
+                new Coordinate(pointDTO.x(), pointDTO.y())
+        );
+    }
+
+    private Location getOrInsertLocation(CreateLocationRequest locationRequest) {
+        Point position = convertToPoint(locationRequest.position());
         return locationRepository.findByPosition(
                 position
         ).orElseGet(() -> {
             log.atInfo().log("Location not found, creating new location");
-            Location location = new Location();
-            location.setPosition(position);
+            Location location = Location.builder()
+                    .position(position)
+                    .name(locationRequest.name())
+                    .address(locationRequest.address())
+                    .build();
             return locationRepository.save(location);
         });
     }
@@ -107,21 +129,11 @@ public class RideServiceImpl implements RideService {
                 () -> new DriverNotFoundException("Driver not found")
         );
 
-        Point startLocation = geometryFactory.createPoint(
-                new Coordinate(createRideRequest.startLocation().x(),
-                        createRideRequest.startLocation().y())
-        );
+        // Check if the startLocation location exists
+        Location start = getOrInsertLocation(createRideRequest.startLocation());
 
-        Point endLocation = geometryFactory.createPoint(
-                new Coordinate(createRideRequest.endLocation().x(),
-                        createRideRequest.endLocation().y())
-        );
-
-        // Check if the start location exists
-        Location start = getOrInsertLocation(startLocation);
-
-        // Check if the end location exists
-        Location end = getOrInsertLocation(endLocation);
+        // Check if the endLocation location exists
+        Location end = getOrInsertLocation(createRideRequest.endLocation());
 
         // Get available status id
         de.htwsaar.carpool.model.RideStatus rideStatus = rideStatusRepository.findByName(RideStatusValue.AVAILABLE.name())
@@ -175,21 +187,13 @@ public class RideServiceImpl implements RideService {
             ride.setRideDescription(updateRideRequest.rideDescription());
         }
 
-        if(updateRideRequest.start() != null) {
-            Point startLocation = geometryFactory.createPoint(
-                    new Coordinate(updateRideRequest.start().x(),
-                            updateRideRequest.start().y())
-            );
-            Location start = getOrInsertLocation(startLocation);
+        if(updateRideRequest.startLocation() != null) {
+            Location start = getOrInsertLocation(updateRideRequest.startLocation());
             ride.setStart(start);
         }
 
-        if(updateRideRequest.end() != null) {
-            Point endLocation = geometryFactory.createPoint(
-                    new Coordinate(updateRideRequest.end().x(),
-                            updateRideRequest.end().y())
-            );
-            Location end = getOrInsertLocation(endLocation);
+        if(updateRideRequest.endLocation() != null) {
+            Location end = getOrInsertLocation(updateRideRequest.endLocation());
             ride.setEnd(end);
         }
 
@@ -210,5 +214,15 @@ public class RideServiceImpl implements RideService {
 
         rideRepository.save(ride);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<List<RideResponse>> getMyRides(String driverId, Sort sort) {
+        List<RideResponse> rides = rideRepository.findAllByDriverId(driverId, sort)
+                .stream()
+                .map(this::buildRideResponse)
+                .toList();
+
+        return ResponseEntity.ok(rides);
     }
 }

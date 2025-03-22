@@ -11,7 +11,10 @@ import de.htwsaar.carpool.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -53,10 +56,15 @@ public class RideController {
         return rideService.getFilteredRides(getRidesRequest);
     }
 
-    // As a driver, I want to create a carpool ride with details like departure time, destination, available seats,
-    // and pick-up points so that other users can find and join my ride.
+    @Operation(summary = "Get all carpool rides created by the user with pagination starting on zero")
+    @GetMapping("/{driverId}")
+    @PreAuthorize("hasAuthority('DRIVER') && principal.username == #driverId")
+    public ResponseEntity<List<RideResponse>> getMyRides(@PathVariable String driverId, @SortDefault("departureDatetime") Sort sort) {
+        return rideService.getMyRides(driverId, sort);
+    }
+
     @Operation(summary = "Create a carpool ride")
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<RideResponse> createRide(@Valid @RequestBody CreateRideRequest createRideRequest, Principal principal) {
         return rideService.createRide(createRideRequest, principal.getName());
     }
@@ -71,7 +79,7 @@ public class RideController {
     }
 
     @Operation(summary = "Delete a carpool ride by updating its status to cancelled")
-    @DeleteMapping("/{rideId}/")
+    @DeleteMapping("/{rideId}")
     public ResponseEntity<Void> cancelRide(@PathVariable Long rideId, Principal driverId)
             throws RideNotFoundException, UnauthorizedDriverException {
         return rideService.cancelRide(rideId, driverId.getName());

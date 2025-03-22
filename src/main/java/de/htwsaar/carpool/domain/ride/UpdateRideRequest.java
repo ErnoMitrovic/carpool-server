@@ -1,6 +1,6 @@
 package de.htwsaar.carpool.domain.ride;
 
-import de.htwsaar.carpool.domain.location.PointDTO;
+import de.htwsaar.carpool.domain.location.CreateLocationRequest;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -17,8 +17,8 @@ import static de.htwsaar.carpool.config.Constants.DATE_TIME_REGEX;
  * @param availableSeats    The number of available seats in the ride
  * @param costPerSeat       The cost per seat in the ride
  * @param rideDescription   The description of the ride
- * @param start             The starting point of the ride
- * @param end               The destination point of the ride
+ * @param startLocation             The starting point of the ride
+ * @param endLocation               The destination point of the ride
  */
 public record UpdateRideRequest(
         @Pattern(regexp = DATE_TIME_REGEX, message = "Datetime format should be " + DATE_TIME_FORMAT)
@@ -29,7 +29,7 @@ public record UpdateRideRequest(
         Float costPerSeat,
         @NotBlank
         String rideDescription,
-        PointDTO start,
-        PointDTO end
+        CreateLocationRequest startLocation,
+        CreateLocationRequest endLocation
 ) implements Serializable {
 }
