@@ -57,7 +57,7 @@ public class RideController {
     }
 
     @Operation(summary = "Get all carpool rides created by the user with pagination starting on zero")
-    @GetMapping("/{driverId}")
+    @GetMapping("/driver/{driverId}")
     @PreAuthorize("hasAuthority('DRIVER') && principal.username == #driverId")
     public ResponseEntity<List<RideResponse>> getMyRides(@PathVariable String driverId, @SortDefault("departureDatetime") Sort sort) {
         return rideService.getMyRides(driverId, sort);
@@ -83,5 +83,11 @@ public class RideController {
     public ResponseEntity<Void> cancelRide(@PathVariable Long rideId, Principal driverId)
             throws RideNotFoundException, UnauthorizedDriverException {
         return rideService.cancelRide(rideId, driverId.getName());
+    }
+
+    @Operation(summary = "Get a carpool ride by its id")
+    @GetMapping("/{rideId}")
+    public ResponseEntity<RideResponse> getRide(@PathVariable Long rideId) throws RideNotFoundException {
+        return rideService.getRide(rideId);
     }
 }

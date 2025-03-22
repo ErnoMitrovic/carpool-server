@@ -61,4 +61,11 @@ public interface RideService {
      * @return ResponseEntity<List < RideResponse>> List of RideResponse
      */
     ResponseEntity<List<RideResponse>> getMyRides(String driverId, Sort sort);
+
+    /**
+     * As a user, I want to get the details of a carpool ride.
+     * @param rideId Ride ID
+     * @return ResponseEntity<RideResponse> RideResponse DTO
+     */
+    ResponseEntity<RideResponse> getRide(Long rideId);
 }

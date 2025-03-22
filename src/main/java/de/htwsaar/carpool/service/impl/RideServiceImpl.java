@@ -67,7 +67,8 @@ public class RideServiceImpl implements RideService {
                         .build(),
                 ride.getAvailableSeats(),
                 ride.getCostPerSeat(),
-                ride.getRideStatus().getName()
+                ride.getRideStatus().getName(),
+                ride.getRideDescription()
         );
     }
 
@@ -171,8 +172,8 @@ public class RideServiceImpl implements RideService {
         }
 
         // Update ride if it is not null
-        if(updateRideRequest.departureDateTime() != null) {
-            ride.setDepartureDatetime(Instant.parse(updateRideRequest.departureDateTime()));
+        if(updateRideRequest.departureDatetime() != null) {
+            ride.setDepartureDatetime(Instant.parse(updateRideRequest.departureDatetime()));
         }
 
         if(updateRideRequest.availableSeats() != null) {
@@ -224,5 +225,14 @@ public class RideServiceImpl implements RideService {
                 .toList();
 
         return ResponseEntity.ok(rides);
+    }
+
+    @Override
+    public ResponseEntity<RideResponse> getRide(Long rideId) {
+        Ride ride = rideRepository.findById(rideId).orElseThrow(
+                () -> new RideNotFoundException("Ride not found"));
+
+        RideResponse rideResponse = buildRideResponse(ride);
+        return ResponseEntity.ok(rideResponse);
     }
 }

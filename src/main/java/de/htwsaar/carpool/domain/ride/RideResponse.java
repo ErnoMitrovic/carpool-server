@@ -11,6 +11,7 @@ public record RideResponse(
         LocationResponse endLocation,
         Integer seats,
         Float price,
-        String status
+        String status,
+        String description
 ) implements Serializable {
 }
