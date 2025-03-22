@@ -8,7 +8,8 @@ VALUES ('U1', 101, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 INSERT INTO ride_status (name)
 VALUES ('AVAILABLE'),
        ('CANCELLED'),
-       ('FULL');
+       ('FULL'),
+       ('COMPLETED');
 
 -- Insert booking statuses
 INSERT INTO booking_status (name)

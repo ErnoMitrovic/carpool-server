@@ -36,7 +36,7 @@ public class RideController {
             @RequestParam Double destLat,
             @RequestParam Double destLng,
             @RequestParam(required = false, defaultValue = "10") double radius,
-            @RequestParam String departureDateTime
+            @RequestParam String departureDatetime
     ) {
         GetRidesRequest getRidesRequest = GetRidesRequest
                 .builder()
@@ -50,7 +50,7 @@ public class RideController {
                         .x(destLng)
                         .y(destLat)
                         .build())
-                .departureDateTime(departureDateTime)
+                .departureDateTime(departureDatetime)
                 .radius(radius)
                 .build();
         return rideService.getFilteredRides(getRidesRequest);
