@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.service;
 
+import com.google.firebase.auth.FirebaseAuthException;
 import de.htwsaar.carpool.domain.booking.BookingResponse;
 import de.htwsaar.carpool.domain.booking.BookingStatusValue;
 import de.htwsaar.carpool.domain.booking.CreateBookingResponse;
@@ -28,7 +29,7 @@ public interface BookingService {
      * @param pageRequest the page request for the pagination
      * @return a response with the booking details
      */
-    ResponseEntity<Page<BookingResponse>> getBookings(String userId, Long rideId, BookingStatusValue statusValue, Pageable pageRequest);
+    ResponseEntity<Page<BookingResponse>> getBookings(String userId, Long rideId, BookingStatusValue statusValue, Pageable pageRequest) throws FirebaseAuthException;
 
     /**
      * The standard service to update the booking status
@@ -38,5 +39,5 @@ public interface BookingService {
      * @param status the status to update to
      * @return a response with the updated booking details
      */
-    ResponseEntity<BookingResponse> updateBookingStatus(String driverId, Long rideId, Long bookingId, BookingStatusValue status);
+    ResponseEntity<BookingResponse> updateBookingStatus(String driverId, Long rideId, Long bookingId, BookingStatusValue status) throws FirebaseAuthException;
 }

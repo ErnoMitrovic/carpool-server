@@ -11,6 +11,7 @@ import de.htwsaar.carpool.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/${api.version}/ride")
 @RequiredArgsConstructor
@@ -65,7 +67,7 @@ public class RideController {
 
     @Operation(summary = "Get all carpool rides created by the user with pagination starting on zero")
     @GetMapping("/driver/{driverId}")
-    @PreAuthorize("hasAuthority('DRIVER') && principal.username == #driverId")
+    @PreAuthorize("hasAuthority('DRIVER') && #driverId == authentication.name")
     public ResponseEntity<List<RideResponse>> getMyRides(@PathVariable String driverId, @SortDefault("departureDatetime") Sort sort) {
         return rideService.getMyRides(driverId, sort);
     }

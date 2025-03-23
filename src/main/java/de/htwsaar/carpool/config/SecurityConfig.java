@@ -79,6 +79,7 @@ public class SecurityConfig {
                     return List.of(new SimpleGrantedAuthority(role));
                 }
         );
+        jwtAuthenticationConverter.setPrincipalClaimName("user_id");
         return jwtAuthenticationConverter;
     }
 }

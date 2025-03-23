@@ -4,6 +4,7 @@ import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
 class CarpoolApplicationTests {
 
     static final GenericContainer<?> redis = new RedisContainer("redis:6.2.6")

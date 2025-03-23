@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -22,7 +23,7 @@ public class Booking {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NotNull
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

@@ -1,17 +1,24 @@
 package de.htwsaar.carpool.integration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GetUsersResult;
+import com.google.firebase.auth.UserRecord;
 import com.redis.testcontainers.RedisContainer;
 import de.htwsaar.carpool.TestSecurityConfig;
 import de.htwsaar.carpool.domain.booking.BookingStatusValue;
-import de.htwsaar.carpool.repository.RideRepository;
+import de.htwsaar.carpool.domain.booking.SetStatusRequest;
+import de.htwsaar.carpool.repository.BookingRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,6 +29,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.containers.GenericContainer;
+
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -42,7 +51,7 @@ public class BookingControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private RideRepository rideRepository;
+    ObjectMapper objectMapper;
 
     private final Long RIDE_ID = 1L;
     private final Long BOOKING_ID = 1L;
@@ -50,6 +59,10 @@ public class BookingControllerTest {
     static final GenericContainer<?> redis = new RedisContainer("redis:6.2.6")
             .withExposedPorts(6379)
             .withReuse(true);
+    @Autowired
+    private FirebaseAuth firebaseAuth;
+    @Autowired
+    private BookingRepository bookingRepository;
 
     @BeforeAll
     static void startRedis() {
@@ -111,10 +124,23 @@ public class BookingControllerTest {
     @Test
     @WithMockUser(username = "U2", authorities = "DRIVER")
     void getBookings_ShouldReturn200_WhenValid() throws Exception {
+        var bookings = bookingRepository.findAllByRideIdAndBookingStatusName(RIDE_ID, BookingStatusValue.PENDING.name(),
+                Pageable.ofSize(10));
+
+        GetUsersResult getUsersResult = Mockito.mock(GetUsersResult.class);
+        UserRecord userRecord = Mockito.mock(UserRecord.class);
+
+        Set<UserRecord> userRecords = Set.of(userRecord);
+
+        Mockito.when(firebaseAuth.getUsers(Mockito.anyCollection()))
+                .thenReturn(getUsersResult);
+        Mockito.when(getUsersResult.getUsers()).thenReturn(userRecords);
+        Mockito.when(userRecord.getUid()).thenReturn("U1");
+        Mockito.when(userRecord.getDisplayName()).thenReturn("User 2");
+
         String url = UriComponentsBuilder.fromUriString(getBaseUrl(RIDE_ID))
                 .queryParam("statusValue", BookingStatusValue.PENDING)
                 .encode().toUriString();
-
         mockMvc.perform(get(url)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -126,8 +152,17 @@ public class BookingControllerTest {
     @Test
     @WithMockUser(username = "U2", authorities = "DRIVER")
     void updateBookingStatus_AcceptBooking_Returns200() throws Exception {
-        mockMvc.perform(patch(getBaseUrl(RIDE_ID) + "/{bookingId}", BOOKING_ID)
-                        .param("status", BookingStatusValue.ACCEPTED.name())
+        UserRecord userRecord = Mockito.mock(UserRecord.class);
+
+        Mockito.when(firebaseAuth.getUser(Mockito.anyString()))
+                .thenReturn(userRecord);
+        Mockito.when(userRecord.getDisplayName()).thenReturn("User 2");
+
+        SetStatusRequest request = SetStatusRequest.builder()
+                .status(BookingStatusValue.ACCEPTED)
+                .build();
+        mockMvc.perform(put(getBaseUrl(RIDE_ID) + "/{bookingId}", BOOKING_ID)
+                        .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bookingStatus").value("ACCEPTED"))
@@ -138,8 +173,11 @@ public class BookingControllerTest {
     @Test
     @WithMockUser(username = "2", authorities = "DRIVER")
     void updateBookingStatus_RejectBooking_Returns200() throws Exception {
-        mockMvc.perform(patch(getBaseUrl(RIDE_ID) + "/{bookingId}", BOOKING_ID)
-                        .param("status", BookingStatusValue.REJECTED.name())
+        SetStatusRequest request = SetStatusRequest.builder()
+                .status(BookingStatusValue.REJECTED)
+                .build();
+        mockMvc.perform(put(getBaseUrl(RIDE_ID) + "/{bookingId}", BOOKING_ID)
+                        .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bookingStatus").value("REJECTED"))
@@ -150,10 +188,13 @@ public class BookingControllerTest {
     @Test
     @WithMockUser(username = "U2", authorities = "DRIVER")
     void updateBookingStatus_FailWhenRideIsFull_Returns400() throws Exception {
+        SetStatusRequest request = SetStatusRequest.builder()
+                .status(BookingStatusValue.ACCEPTED)
+                .build();
         // Ride with 0 seats available (London Trip)
         long FULL_RIDE_ID = 4L;
-        mockMvc.perform(patch(getBaseUrl(FULL_RIDE_ID) + "/{bookingId}", BOOKING_ID)
-                        .param("status", BookingStatusValue.ACCEPTED.name())
+        mockMvc.perform(put(getBaseUrl(FULL_RIDE_ID) + "/{bookingId}", BOOKING_ID)
+                        .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -161,10 +202,13 @@ public class BookingControllerTest {
     @Test
     @WithMockUser(username = "U2", authorities = "DRIVER")
     void updateBookingStatus_FailWhenBookingNotFound_Returns404() throws Exception {
+        SetStatusRequest request = SetStatusRequest.builder()
+                .status(BookingStatusValue.ACCEPTED)
+                .build();
         Long nonExistentBookingId = 999L;
 
-        mockMvc.perform(patch(getBaseUrl(RIDE_ID) + "/{bookingId}", nonExistentBookingId)
-                        .param("status", BookingStatusValue.ACCEPTED.name())
+        mockMvc.perform(put(getBaseUrl(RIDE_ID) + "/{bookingId}", nonExistentBookingId)
+                        .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
