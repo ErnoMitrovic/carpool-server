@@ -3,6 +3,7 @@ package de.htwsaar.carpool.integration;
 import com.redis.testcontainers.RedisContainer;
 import de.htwsaar.carpool.TestSecurityConfig;
 import de.htwsaar.carpool.domain.booking.BookingStatusValue;
+import de.htwsaar.carpool.repository.RideRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +41,9 @@ public class BookingControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private final Long DRIVER_ID = 2L;
+    @Autowired
+    private RideRepository rideRepository;
+
     private final Long RIDE_ID = 1L;
     private final Long BOOKING_ID = 1L;
 
@@ -61,7 +64,7 @@ public class BookingControllerTest {
     }
 
     private String getBaseUrl(long rideId) {
-        return String.format("http://localhost:8080/api/%s/ride/%d/booking", apiVersion, rideId);
+        return String.format("/api/%s/ride/%d/booking", apiVersion, rideId);
     }
 
     @Test
@@ -106,9 +109,9 @@ public class BookingControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "U1", authorities = "DRIVER")
+    @WithMockUser(username = "U2", authorities = "DRIVER")
     void getBookings_ShouldReturn200_WhenValid() throws Exception {
-        String url = UriComponentsBuilder.fromHttpUrl(getBaseUrl(1))
+        String url = UriComponentsBuilder.fromUriString(getBaseUrl(RIDE_ID))
                 .queryParam("statusValue", BookingStatusValue.PENDING)
                 .encode().toUriString();
 

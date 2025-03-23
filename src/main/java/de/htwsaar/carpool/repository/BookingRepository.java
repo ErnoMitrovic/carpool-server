@@ -22,9 +22,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     /**
      * Used to get all the bookings of a ride
      * @param rideId the ride referenced
-     * @param userId the user's id
      * @param statusName the status of the booking
      * @return a list of bookings
      */
-    Page<Booking> findAllByRideIdAndCarpoolUserIdAndBookingStatusName(Long rideId, String userId, String statusName, Pageable pageable);
+    Page<Booking> findAllByRideIdAndBookingStatusName(Long rideId, String statusName, Pageable pageable);
 }

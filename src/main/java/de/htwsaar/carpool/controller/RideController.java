@@ -11,8 +11,12 @@ import de.htwsaar.carpool.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,13 +34,16 @@ public class RideController {
     // so that I can find suitable travel options.
     @Operation(summary = "Search for available carpool rides based on destination, date, and time")
     @GetMapping
-    public ResponseEntity<List<RideResponse>> searchRides(
+    @PageableAsQueryParam
+    public ResponseEntity<Page<RideResponse>> searchRides(
+            @RequestParam(defaultValue = "500") Double radius,
             @RequestParam Double userLat,
             @RequestParam Double userLng,
             @RequestParam Double destLat,
             @RequestParam Double destLng,
-            @RequestParam(required = false, defaultValue = "10") double radius,
-            @RequestParam String departureDatetime
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            String departureDatetime,
+            Pageable page
     ) {
         GetRidesRequest getRidesRequest = GetRidesRequest
                 .builder()
@@ -53,7 +60,7 @@ public class RideController {
                 .departureDateTime(departureDatetime)
                 .radius(radius)
                 .build();
-        return rideService.getFilteredRides(getRidesRequest);
+        return rideService.getFilteredRides(getRidesRequest, page);
     }
 
     @Operation(summary = "Get all carpool rides created by the user with pagination starting on zero")

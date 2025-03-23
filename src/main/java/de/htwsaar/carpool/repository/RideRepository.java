@@ -2,6 +2,8 @@ package de.htwsaar.carpool.repository;
 
 import de.htwsaar.carpool.model.Ride;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,7 +22,6 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
      *
      * @param userLocation      the current user location
      * @param destination       the destination point
-     * @param radius            Radius in which the startLocation and endLocation locations should be in km
      * @param departureDatetime Departure datetime
      * @return List of available rides
      */
@@ -29,17 +30,26 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
                             JOIN Location l_start ON r.start = l_start
                             JOIN Location l_end ON r.end = l_end
                             WHERE r.availableSeats >= 1
-                            AND DISTANCE(l_end.position, :destination) <= :radius
-                            AND DISTANCE(l_start.position, :userLocation) <= :radius
+                            AND DISTANCE(GEOGRAPHY(l_start.position), GEOGRAPHY(:userLocation)) <= :radius
+                            AND DISTANCE(GEOGRAPHY(l_end.position), GEOGRAPHY(:destination)) <= :radius
                             AND r.departureDatetime >= :departureDatetime
                             AND r.rideStatus.name = "AVAILABLE"
-                            ORDER BY DISTANCE(l_start.position, :userLocation) ASC, r.departureDatetime ASC
+                            ORDER BY DISTANCE(l_start.position, :userLocation) ASC,
+                            DISTANCE(l_end.position, :destination) ASC, r.departureDatetime ASC
+            """, countQuery = """
+            SELECT COUNT(r) FROM Ride r
+            WHERE r.availableSeats >= 1
+            AND distance(r.start.position, :userLocation) <= :radius
+            AND distance(r.end.position, :destination) <= :radius
+            AND r.departureDatetime >= :departureDatetime
+            AND r.rideStatus.name = 'AVAILABLE'
             """)
-    List<Ride> findAvailableRides(
+    Page<Ride> findAvailableRides(
+            @Param("radius") Double radius,
             @Param("userLocation") Point userLocation,
             @Param("destination") Point destination,
-            @Param("radius") double radius,
-            @Param("departureDatetime") Instant departureDatetime);
+            @Param("departureDatetime") Instant departureDatetime,
+            Pageable pageable);
 
     /**
      * The method finds available rides that match the given criteria.

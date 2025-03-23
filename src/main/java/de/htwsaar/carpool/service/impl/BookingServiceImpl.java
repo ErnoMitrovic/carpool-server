@@ -72,12 +72,11 @@ public class BookingServiceImpl implements BookingService {
                                                              Long rideId,
                                                              BookingStatusValue statusValue,
                                                              Pageable pageable) {
-        if (rideRepository.existsByIdAndDriverId(rideId, userId))
+        if (!rideRepository.existsByIdAndDriverId(rideId, userId))
             throw new UnauthorizedDriverException(userId, rideId);
 
-        Page<Booking> bookings = bookingRepository.findAllByRideIdAndCarpoolUserIdAndBookingStatusName(
+        Page<Booking> bookings = bookingRepository.findAllByRideIdAndBookingStatusName(
                 rideId,
-                userId,
                 statusValue.name(),
                 pageable);
 
