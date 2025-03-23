@@ -24,6 +24,8 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -95,7 +97,7 @@ public class RideServiceImpl implements RideService {
 
 
     @Override
-    public ResponseEntity<List<RideResponse>> getFilteredRides(@Valid GetRidesRequest getRidesRequest) throws RideNotFoundException {
+    public ResponseEntity<Page<RideResponse>> getFilteredRides(@Valid GetRidesRequest getRidesRequest, Pageable pageable) throws RideNotFoundException {
 
         Point startLocation = geometryFactory.createPoint(
                 new Coordinate(getRidesRequest.startLocation().x(),
@@ -107,16 +109,17 @@ public class RideServiceImpl implements RideService {
                         getRidesRequest.endLocation().y())
         );
 
-        List<RideResponse> rides = rideRepository.findAvailableRides(
+        Page<RideResponse> rides = rideRepository.findAvailableRides(
+                getRidesRequest.radius(),
                 startLocation,
                 endLocation,
-                getRidesRequest.radius(),
-                Instant.parse(getRidesRequest.departureDateTime())
-        ).stream().map(this::buildRideResponse).toList();
+                Instant.parse(getRidesRequest.departureDateTime()),
+                pageable
+        ).map(this::buildRideResponse);
 
         if(rides.isEmpty()) throw new RideNotFoundException();
 
-        log.debug("Found {} rides", rides.size());
+        log.debug("Found {} rides", rides.getTotalElements());
 
         return ResponseEntity.ok(rides);
     }

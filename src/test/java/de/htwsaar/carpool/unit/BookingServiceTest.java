@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -154,7 +154,8 @@ class BookingServiceTest {
         Pageable pageable = PageRequest.of(0, 5);
         Page<Booking> bookingPage = new PageImpl<>(List.of(testBooking), pageable, 1);
 
-        when(bookingRepository.findAllByRideIdAndCarpoolUserIdAndBookingStatusName(1L, "2L", "PENDING", pageable))
+        when(rideRepository.existsByIdAndDriverId(1L, "2L")).thenReturn(true);
+        when(bookingRepository.findAllByRideIdAndBookingStatusName(1L, "PENDING", pageable))
                 .thenReturn(bookingPage);
 
         var response = bookingService.getBookings("2L", 1L, BookingStatusValue.PENDING, pageable);
@@ -169,7 +170,8 @@ class BookingServiceTest {
         Pageable pageable = PageRequest.of(0, 5);
         Page<Booking> emptyPage = Page.empty(pageable);
 
-        when(bookingRepository.findAllByRideIdAndCarpoolUserIdAndBookingStatusName(1L, "2L", "PENDING", pageable))
+        when(rideRepository.existsByIdAndDriverId(anyLong(), anyString())).thenReturn(true);
+        when(bookingRepository.findAllByRideIdAndBookingStatusName(1L, "PENDING", pageable))
                 .thenReturn(emptyPage);
 
         var response = bookingService.getBookings("2L", 1L, BookingStatusValue.PENDING, pageable);
@@ -182,7 +184,8 @@ class BookingServiceTest {
     void getBookings_ThrowsException_WhenRideNotFound() {
         Pageable pageable = PageRequest.of(0, 5);
 
-        when(bookingRepository.findAllByRideIdAndCarpoolUserIdAndBookingStatusName(999L, "2L", "PENDING", pageable))
+        when(rideRepository.existsByIdAndDriverId(anyLong(), anyString())).thenReturn(true);
+        when(bookingRepository.findAllByRideIdAndBookingStatusName(999L, "PENDING", pageable))
                 .thenThrow(new RideNotFoundException());
 
         assertThrows(RideNotFoundException.class, () ->

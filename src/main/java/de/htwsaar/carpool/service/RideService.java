@@ -6,6 +6,8 @@ import de.htwsaar.carpool.domain.ride.RideResponse;
 import de.htwsaar.carpool.domain.ride.UpdateRideRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,10 @@ public interface RideService {
      * As a user, I want to search for available carpool rides based on my destination, date, and time
      *
      * @param getRidesRequest GetRidesRequest DTO
+     * @param pageable        Pageable
      * @return ResponseEntity<List < RideResponse>> List of RideResponse
      */
-    ResponseEntity<List<RideResponse>> getFilteredRides(GetRidesRequest getRidesRequest);
+    ResponseEntity<Page<RideResponse>> getFilteredRides(GetRidesRequest getRidesRequest, Pageable pageable);
 
     /**
      * As a driver, I want to create a carpool ride with details like departure time, destination, available seats,
