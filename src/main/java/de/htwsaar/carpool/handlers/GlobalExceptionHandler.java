@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
-        log.error("General exception occurred: {}", ex.getMessage());
+        log.error("General exception occurred:", ex);
         return ResponseEntity.internalServerError().body(
                 ErrorResponse.builder().message(ex.getMessage()).build()
         );

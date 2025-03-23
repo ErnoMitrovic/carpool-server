@@ -20,6 +20,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findBookingByRideAndCarpoolUserId(Ride ride, String userId);
 
     /**
+     * Used to check if the user has already booked this ride
+     * @param ride the ride referenced
+     * @param userId the user's id
+     * @return a boolean
+     */
+    boolean existsByRideAndCarpoolUserId(Ride ride, String userId);
+
+    /**
      * Used to get all the bookings of a ride
      * @param rideId the ride referenced
      * @param statusName the status of the booking

@@ -11,14 +11,14 @@ import java.util.Optional;
 public interface LocationRepository extends JpaRepository<Location, Long> {
 
     /**
-     * Find a location by its position within a radius of 100 meters.
+     * Find a location by its position within a radius of 10 meters.
      * @param position The position to search for.
      * @return The location if found.
      */
     @Query(value = """
             SELECT l
             FROM Location l
-            WHERE distance(geometry(l.position), geometry(:position)) < 100
+            WHERE distance(geography(l.position), geography(:position)) < 10
             """)
     Optional<Location> findByPosition(@Param("position") Point position);
 }

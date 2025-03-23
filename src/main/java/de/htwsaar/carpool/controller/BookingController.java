@@ -1,8 +1,10 @@
 package de.htwsaar.carpool.controller;
 
+import com.google.firebase.auth.FirebaseAuthException;
 import de.htwsaar.carpool.domain.booking.BookingResponse;
 import de.htwsaar.carpool.domain.booking.BookingStatusValue;
 import de.htwsaar.carpool.domain.booking.CreateBookingResponse;
+import de.htwsaar.carpool.domain.booking.SetStatusRequest;
 import de.htwsaar.carpool.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -31,10 +34,11 @@ public class BookingController {
     @GetMapping
     @PreAuthorize("hasAuthority('DRIVER')")
     public ResponseEntity<Page<BookingResponse>> getBookings(@RequestParam BookingStatusValue statusValue,
-                                                             Principal principal,
+                                                             Authentication principal,
                                                              @PathVariable Long rideId,
                                                              @RequestParam(defaultValue = "0") Integer page,
-                                                             @RequestParam(defaultValue = "10") Integer size) {
+                                                             @RequestParam(defaultValue = "10") Integer size) throws FirebaseAuthException {
+
         return bookingService.getBookings(
                 principal.getName(),
                 rideId,
@@ -42,13 +46,13 @@ public class BookingController {
                 PageRequest.of(page, size));
     }
 
-    @PatchMapping("/{bookingId}")
+    @PutMapping("/{bookingId}")
     public ResponseEntity<BookingResponse> updateBookingStatus(
             Principal principal,
             @PathVariable Long rideId,
             @PathVariable Long bookingId,
-            @RequestParam BookingStatusValue status) {
+            @RequestBody SetStatusRequest statusRequest) throws FirebaseAuthException {
 
-        return bookingService.updateBookingStatus(principal.getName(), rideId, bookingId, status);
+        return bookingService.updateBookingStatus(principal.getName(), rideId, bookingId, statusRequest.status());
     }
 }

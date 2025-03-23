@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.service.impl;
 
+import com.google.firebase.auth.*;
 import de.htwsaar.carpool.domain.booking.BookingResponse;
 import de.htwsaar.carpool.domain.booking.BookingStatusValue;
 import de.htwsaar.carpool.domain.booking.CreateBookingResponse;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Component
@@ -30,6 +32,7 @@ public class BookingServiceImpl implements BookingService {
     private final RideRepository rideRepository;
     private final BookingStatusRepository bookingStatusRepository;
     private final UserRepository userRepository;
+    private final FirebaseAuth firebaseAuth;
 
     @Override
     @Transactional
@@ -40,15 +43,14 @@ public class BookingServiceImpl implements BookingService {
             throw new UnavailableSeatsException();
         }
 
-        List<Booking> existingBooking = bookingRepository.findBookingByRideAndCarpoolUserId(ride, userId);
-        if (!existingBooking.isEmpty()) {
+        if (bookingRepository.existsByRideAndCarpoolUserId(ride, userId)) {
             throw new BookedException(userId, rideId);
         }
 
         CarpoolUser user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
-        BookingStatus bookingStatus = bookingStatusRepository.findByName(BookingStatusValue.ACCEPTED.name())
-                .orElseThrow(() -> new StatusNotFound(BookingStatusValue.ACCEPTED));
+        BookingStatus bookingStatus = bookingStatusRepository.findByName(BookingStatusValue.PENDING.name())
+                .orElseThrow(() -> new StatusNotFound(BookingStatusValue.PENDING));
 
         Booking booking = Booking.builder()
                 .carpoolUser(user)
@@ -71,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
     public ResponseEntity<Page<BookingResponse>> getBookings(String userId,
                                                              Long rideId,
                                                              BookingStatusValue statusValue,
-                                                             Pageable pageable) {
+                                                             Pageable pageable) throws FirebaseAuthException {
         if (!rideRepository.existsByIdAndDriverId(rideId, userId))
             throw new UnauthorizedDriverException(userId, rideId);
 
@@ -80,12 +82,21 @@ public class BookingServiceImpl implements BookingService {
                 statusValue.name(),
                 pageable);
 
+        List<UserIdentifier> userIds = bookings.map(booking -> (UserIdentifier) new UidIdentifier(booking.getCarpoolUser().getId()))
+                .get().toList();
+
+        var userNamesMap = firebaseAuth.getUsers(userIds)
+                .getUsers()
+                .stream()
+                .collect(Collectors.toMap(
+                        UserRecord::getUid,
+                        UserRecord::getDisplayName));
+
         Page<BookingResponse> responsePage = bookings.map(booking ->
                 BookingResponse.builder()
                         .bookingId(booking.getId())
                         .rideId(booking.getRide().getId())
-                        .username(booking.getCarpoolUser().getId())
-                        // .userRole(booking.getCarpoolUser().getRole().getName())
+                        .username(userNamesMap.get(booking.getCarpoolUser().getId()))
                         .bookingStatus(booking.getBookingStatus().getName())
                         .rideStatus(booking.getRide().getRideStatus().getName())
                         .build());
@@ -94,7 +105,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public ResponseEntity<BookingResponse> updateBookingStatus(String driverId, Long rideId, Long bookingId, BookingStatusValue status) {
+    public ResponseEntity<BookingResponse> updateBookingStatus(String driverId, Long rideId, Long bookingId, BookingStatusValue status) throws FirebaseAuthException {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
@@ -118,10 +129,12 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.save(booking);
         rideRepository.save(ride);
 
+        String username = firebaseAuth.getUser(booking.getCarpoolUser().getId()).getDisplayName();
+
         BookingResponse response = BookingResponse.builder()
                 .bookingId(booking.getId())
                 .rideId(ride.getId())
-                .username(booking.getCarpoolUser().getId())
+                .username(username)
                 .bookingStatus(booking.getBookingStatus().getName())
                 .rideStatus(ride.getRideStatus().getName())
                 .build();
