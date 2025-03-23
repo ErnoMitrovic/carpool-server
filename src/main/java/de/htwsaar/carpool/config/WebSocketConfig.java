@@ -1,6 +1,7 @@
 package de.htwsaar.carpool.config;
 
 import de.htwsaar.carpool.websocket.ChatWebSocketHandler;
+import de.htwsaar.carpool.websocket.LocationWebSocketHandler;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -28,10 +29,15 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private ChatWebSocketHandler chatWebSocketHandler;
+    private LocationWebSocketHandler locationWebSocketHandler;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(chatWebSocketHandler, "/chat")
+                .setAllowedOrigins("*")
+                .addInterceptors(new HttpSessionHandshakeInterceptor());
+
+        registry.addHandler(locationWebSocketHandler, "/location")
                 .setAllowedOrigins("*")
                 .addInterceptors(new HttpSessionHandshakeInterceptor());
     }

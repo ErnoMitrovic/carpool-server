@@ -1,5 +1,6 @@
 package de.htwsaar.carpool.controller;
 
+import de.htwsaar.carpool.domain.location.ShareableLocationPayload;
 import de.htwsaar.carpool.domain.message.WebSocketPayload;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -80,7 +81,7 @@ public class WebSocketSwaggerController {
                     @ApiResponse(responseCode = "400", description = "Invalid Message Format")
             }
     )
-    @GetMapping("/api/websocket-info")
+    @GetMapping("/api/messaging-websocket-info")
     public String websocketInfo(
             @Parameter(description = "Group chat ID", example = "ride123")
             @RequestParam(required = false) String rideId,
@@ -99,4 +100,57 @@ public class WebSocketSwaggerController {
             return "Invalid parameters. Provide either rideId or senderId & receiverId.";
         }
     }
+
+    @Schema(name = "ShareableLocationPayload", description = "Payload structure for WebSocket Location Sharing")
+    @Operation(
+            summary = "Location Sharing WebSocket Message Format",
+            description = """
+        WebSocket messages for location sharing should use the following format:
+
+        ```json
+        {
+            "latitude": 52.5200,
+            "longitude": 13.4050,
+            "clientTimestamp": "2024-03-22T14:30:00Z"
+        }
+        ```
+
+        Connection URL:
+        - `ws://localhost:8080/location?userId={userId}&rideId={rideId}`
+        """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "WebSocket Connection Successful",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ShareableLocationPayload.class),
+                                    examples = {
+                                            @ExampleObject(
+                                                    name = "Shareable Location Payload",
+                                                    description = "User location update message",
+                                                    value = """
+                                {
+                                    "userId": "user123",
+                                    "latitude": 52.5200,
+                                    "longitude": 13.4050,
+                                    "clientTimestamp": "2024-03-22T14:30:00Z"
+                                    "serverTimestamp": "2024-03-22T14:50:00Z"
+                                }
+                                """
+                                            )
+                                    }
+                            )
+                    ),
+                    @ApiResponse(responseCode = "400", description = "Invalid Location Payload")
+            }
+    )
+    @GetMapping("/api/location-websocket-info")
+    public String locationWebSocketInfo(
+            @Parameter(description = "User ID", example = "user123") @RequestParam String userId,
+            @Parameter(description = "Ride ID", example = "ride456") @RequestParam String rideId
+    ) {
+        return "WebSocket URL: ws://localhost:8080/location?userId=" + userId + "&rideId=" + rideId;
+    }
+
 }
