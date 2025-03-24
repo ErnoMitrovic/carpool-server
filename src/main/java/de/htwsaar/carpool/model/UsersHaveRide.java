@@ -1,13 +1,15 @@
 package de.htwsaar.carpool.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "users_have_rides")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UsersHaveRide {
     @EmbeddedId
     private UsersHaveRideId id;

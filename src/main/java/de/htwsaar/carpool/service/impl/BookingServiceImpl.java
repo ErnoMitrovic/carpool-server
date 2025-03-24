@@ -5,14 +5,8 @@ import de.htwsaar.carpool.domain.booking.BookingResponse;
 import de.htwsaar.carpool.domain.booking.BookingStatusValue;
 import de.htwsaar.carpool.domain.booking.CreateBookingResponse;
 import de.htwsaar.carpool.exceptions.*;
-import de.htwsaar.carpool.model.Booking;
-import de.htwsaar.carpool.model.BookingStatus;
-import de.htwsaar.carpool.model.CarpoolUser;
-import de.htwsaar.carpool.model.Ride;
-import de.htwsaar.carpool.repository.BookingRepository;
-import de.htwsaar.carpool.repository.BookingStatusRepository;
-import de.htwsaar.carpool.repository.RideRepository;
-import de.htwsaar.carpool.repository.UserRepository;
+import de.htwsaar.carpool.model.*;
+import de.htwsaar.carpool.repository.*;
 import de.htwsaar.carpool.service.BookingService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -33,6 +27,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingStatusRepository bookingStatusRepository;
     private final UserRepository userRepository;
     private final FirebaseAuth firebaseAuth;
+    private final UsersHaveRideRepository usersHaveRideRepository;
 
     @Override
     @Transactional
@@ -120,6 +115,16 @@ public class BookingServiceImpl implements BookingService {
                 throw new UnavailableSeatsException();
             }
             ride.setAvailableSeats(ride.getAvailableSeats() - 1);
+
+            UsersHaveRideId usersHaveRideId = new UsersHaveRideId();
+            usersHaveRideId.setUserId(booking.getCarpoolUser().getId());
+            usersHaveRideId.setRideId(rideId);
+            UsersHaveRide usersHaveRide = UsersHaveRide.builder()
+                    .id(usersHaveRideId)
+                    .carpoolUser(booking.getCarpoolUser())
+                    .ride(ride)
+                    .build();
+            usersHaveRideRepository.save(usersHaveRide);
         }
 
         BookingStatus bookingStatus = bookingStatusRepository.findByName(status.name())
@@ -140,5 +145,60 @@ public class BookingServiceImpl implements BookingService {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<Page<BookingResponse>> getUserBookings(String userId,
+                                                                 BookingStatusValue statusValue,
+                                                                 Pageable pageable)
+            throws FirebaseAuthException {
+        Page<Booking> bookings = bookingRepository.findAllByCarpoolUserIdAndBookingStatusName(
+                userId, statusValue.name(), pageable);
+
+        var userIds = bookings
+                .map(Booking::getCarpoolUser)
+                .map(CarpoolUser::getId)
+                .map(uid -> (UserIdentifier) new UidIdentifier(uid)).toList();
+
+        var userNamesMap = firebaseAuth.getUsers(userIds)
+                .getUsers()
+                .stream()
+                .collect(Collectors.toMap(
+                        UserRecord::getUid,
+                        UserRecord::getDisplayName));
+
+        return ResponseEntity.ok(bookings
+                .map(booking -> BookingResponse.builder()
+                        .bookingId(booking.getId())
+                        .rideId(booking.getRide().getId())
+                        .username(userNamesMap.get(booking.getCarpoolUser().getId()))
+                        .bookingStatus(booking.getBookingStatus().getName())
+                        .rideStatus(booking.getRide().getRideStatus().getName())
+                        .build()));
+    }
+
+    @Override
+    public void cancelBooking(String userId, Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException(bookingId));
+
+        if (!booking.getCarpoolUser().getId().equals(userId)) {
+            throw new UnauthorizedUserException(userId, bookingId);
+        }
+
+        if (booking.getBookingStatus().getName().equals(BookingStatusValue.ACCEPTED.name())) {
+            Ride ride = booking.getRide();
+            ride.setAvailableSeats(ride.getAvailableSeats() + 1);
+            rideRepository.save(ride);
+
+            UsersHaveRideId usersHaveRideId = new UsersHaveRideId();
+            usersHaveRideId.setUserId(booking.getCarpoolUser().getId());
+            usersHaveRideId.setRideId(ride.getId());
+            usersHaveRideRepository.deleteById(usersHaveRideId);
+        }
+
+        booking.setBookingStatus(bookingStatusRepository.findByName(BookingStatusValue.CANCELLED.name())
+                .orElseThrow(() -> new StatusNotFound(BookingStatusValue.CANCELLED)));
+        bookingRepository.save(booking);
     }
 }

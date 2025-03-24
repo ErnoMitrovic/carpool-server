@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 public interface BookingService {
     /**
      * The standard service to create a booking based on the userId and the rideId
+     *
      * @param userId the user that made the booking
      * @param rideId the ride referenced
      * @return a response with only the id
@@ -23,8 +24,9 @@ public interface BookingService {
 
     /**
      * The standard service to get the bookings based on the rideId
-     * @param userId the user that made the booking
-     * @param rideId the ride referenced
+     *
+     * @param userId      the user that made the booking
+     * @param rideId      the ride referenced
      * @param statusValue the status of the booking
      * @param pageRequest the page request for the pagination
      * @return a response with the booking details
@@ -33,11 +35,30 @@ public interface BookingService {
 
     /**
      * The standard service to update the booking status
-     * @param driverId the driver that is updating the status
-     * @param rideId the ride referenced
+     *
+     * @param driverId  the driver that is updating the status
+     * @param rideId    the ride referenced
      * @param bookingId the booking referenced
-     * @param status the status to update to
+     * @param status    the status to update to
      * @return a response with the updated booking details
      */
     ResponseEntity<BookingResponse> updateBookingStatus(String driverId, Long rideId, Long bookingId, BookingStatusValue status) throws FirebaseAuthException;
+
+    /**
+     * The standard service to get the bookings based on the userId
+     *
+     * @param userId      the user that made the booking
+     * @param statusValue the status of the booking
+     * @param pageable    the page request for the pagination
+     * @return a response with the booking details
+     */
+    ResponseEntity<Page<BookingResponse>> getUserBookings(String userId, BookingStatusValue statusValue, Pageable pageable) throws FirebaseAuthException;
+
+    /**
+     * The standard service to cancel a booking
+     *
+     * @param userId    the user that made the booking
+     * @param bookingId the booking referenced
+     */
+    void cancelBooking(String userId, Long bookingId);
 }

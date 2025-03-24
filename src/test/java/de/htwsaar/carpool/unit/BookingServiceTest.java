@@ -10,10 +10,7 @@ import de.htwsaar.carpool.domain.booking.CreateBookingResponse;
 import de.htwsaar.carpool.domain.ride.RideStatusValue;
 import de.htwsaar.carpool.exceptions.*;
 import de.htwsaar.carpool.model.*;
-import de.htwsaar.carpool.repository.BookingRepository;
-import de.htwsaar.carpool.repository.BookingStatusRepository;
-import de.htwsaar.carpool.repository.RideRepository;
-import de.htwsaar.carpool.repository.UserRepository;
+import de.htwsaar.carpool.repository.*;
 import de.htwsaar.carpool.service.impl.BookingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +48,9 @@ class BookingServiceTest {
 
     @Mock
     private BookingStatusRepository bookingStatusRepository;
+
+    @Mock
+    private UsersHaveRideRepository usersHaveRideRepository;
 
     @Mock
     private FirebaseAuth firebaseAuth;
@@ -222,6 +222,7 @@ class BookingServiceTest {
 
         UserRecord userRecord = Mockito.mock(UserRecord.class);
         when(firebaseAuth.getUser(anyString())).thenReturn(userRecord);
+        when(usersHaveRideRepository.save(any(UsersHaveRide.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ResponseEntity<BookingResponse> response = bookingService.updateBookingStatus(
                 "1L", 1L, 100L, BookingStatusValue.ACCEPTED);
