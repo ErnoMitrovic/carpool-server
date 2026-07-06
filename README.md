@@ -10,7 +10,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/ErnoMitrovic/carpool-server">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="./images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Shared Uni (Carpool Server)</h3>
@@ -200,7 +200,7 @@ Project Link: [https://github.com/ErnoMitrovic/carpool-server](https://github.co
 [license-url]: https://github.com/ErnoMitrovic/carpool-server/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/ernomitrovic
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: ./images/screenshot.png
 
 [Java-shield]: https://img.shields.io/badge/Java-23-007396?style=for-the-badge&logo=openjdk&logoColor=white
 [Java-url]: https://www.oracle.com/java/
