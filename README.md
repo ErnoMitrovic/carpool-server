@@ -172,9 +172,6 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Contact
-
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
-
 Project Links: 
 * [https://github.com/ErnoMitrovic/carpool-server](https://github.com/ErnoMitrovic/carpool-server)
 * [https://github.com/ErnoMitrovic/carpool-app](https://github.com/ErnoMitrovic/carpool-app)
