@@ -57,7 +57,7 @@
 
 ## About The Project
 
-[Shared Uni Screenshot](images/screenshot.png)
+![Shared Uni Screenshot](https://github.com/ErnoMitrovic/carpool-server/blob/main/images/screenshot.png)
 
 Carpool Server is a backend API for a carpool platform. It provides endpoints for authentication, ride management, booking flow, and real-time communication.
 
