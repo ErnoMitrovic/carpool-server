@@ -10,7 +10,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/ErnoMitrovic/carpool-server">
-    <img src="./images/logo.png" alt="Logo" width="80" height="80">
+    <img width="256" height="256" alt="logo" src="https://github.com/user-attachments/assets/ba3fc138-7f13-4048-b65b-3ce58fa65da3" />
   </a>
 
 <h3 align="center">Shared Uni (Carpool Server)</h3>
@@ -57,7 +57,7 @@
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+[Shared Uni Screenshot](images/screenshot.png)
 
 Carpool Server is a backend API for a carpool platform. It provides endpoints for authentication, ride management, booking flow, and real-time communication.
 
